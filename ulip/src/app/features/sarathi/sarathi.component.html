@@ -1,0 +1,178 @@
+<div class="page-container">
+
+  <app-back-button></app-back-button>
+
+  <div class="page-header">
+    <div class="breadcrumb">Sarathi</div>
+    <h1 class="page-title">Sarathi</h1>
+    <p class="page-desc">Query driving licence information via Sarathi API</p>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Request Parameters</div>
+    <form (ngSubmit)="onSubmit()">
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="dlnumber">Driving Licence Number <span class="required">*</span></label>
+          <input
+            id="dlnumber"
+            type="text"
+            [(ngModel)]="formData.dlnumber"
+            name="dlnumber"
+            placeholder="e.g. AP13120179000719"
+            autocomplete="off"
+            maxlength="20"
+            [class.field-invalid]="submitted && !formData.dlnumber.trim()"
+          />
+          <span class="error-text" *ngIf="submitted && !formData.dlnumber.trim()">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12" y2="16"/></svg>
+            Driving Licence Number is required
+          </span>
+        </div>
+
+        <div class="form-group">
+          <label for="dob">Date of Birth <span class="required">*</span></label>
+          <input
+            id="dob"
+            type="date"
+            [(ngModel)]="formData.dob"
+            name="dob"
+            [class.field-invalid]="submitted && !formData.dob.trim()"
+          />
+          <span class="error-text" *ngIf="submitted && !formData.dob.trim()">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12" y2="16"/></svg>
+            Date of Birth is required
+          </span>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button type="submit" class="btn-primary" [disabled]="loading">
+          <span *ngIf="!loading">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:6px;vertical-align:middle">
+              <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+            </svg>
+            Search
+          </span>
+          <span *ngIf="loading" class="spinner"></span>
+        </button>
+        <button type="button" class="btn-secondary" (click)="clearForm()">Clear</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="alert-error" *ngIf="errorMessage">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0">
+      <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12" y2="16"/>
+    </svg>
+    <span>{{ errorMessage }}</span>
+  </div>
+
+  <ng-container *ngIf="apiResponse">
+    <div class="status-banner" [class.status-success]="hasResult" [class.status-error]="!hasResult">
+      <div class="status-left">
+        <span class="status-dot"></span>
+        <div>
+          <div class="status-title">{{ hasResult ? 'Record Found' : 'Query Failed' }}</div>
+          <div class="status-sub">{{ apiResponse.message || (hasResult ? 'Success' : 'Failed') }} &nbsp;·&nbsp; Code {{ apiResponse.code }}</div>
+        </div>
+      </div>
+    </div>
+
+    <ng-container *ngIf="hasResult">
+
+      <!-- Photograph -->
+      <div class="card detail-card" *ngIf="photoDataUrl">
+        <div class="card-title">Photograph</div>
+        <img [src]="photoDataUrl" alt="Licence holder photograph" class="dl-photo" />
+      </div>
+
+      <!-- Licence Details -->
+      <div class="card detail-card">
+        <div class="card-title">Licence Details</div>
+        <div class="detail-grid">
+          <div class="detail-item" *ngFor="let f of licenseFields">
+            <span class="detail-label">{{ f.label }}</span>
+            <span class="detail-value">{{ getValue(licenseDetails, f.key) }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Personal Details -->
+      <div class="card detail-card">
+        <div class="card-title">Personal Details</div>
+        <div class="detail-grid">
+          <div class="detail-item" *ngFor="let f of personalFields">
+            <span class="detail-label">{{ f.label }}</span>
+            <span class="detail-value">{{ getValue(personalDetails, f.key) }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Permanent Address</span>
+            <span class="detail-value">{{ permanentAddress }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Temporary Address</span>
+            <span class="detail-value">{{ temporaryAddress }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Vehicle Class Endorsements -->
+      <div class="card detail-card" *ngIf="vehicleClasses.length">
+        <div class="card-title">Vehicle Class Endorsements ({{ vehicleClasses.length }})</div>
+        <div class="table-scroll">
+          <table class="result-table">
+            <thead>
+              <tr>
+                <th>Class</th>
+                <th>Description</th>
+                <th>Category</th>
+                <th>Status</th>
+                <th>Issue Date</th>
+                <th>Endorsement Date</th>
+                <th>Endorsement No.</th>
+                <th>Issuing Office</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let v of vehicleClasses">
+                <td>{{ getValue(v, 'covabbrv') }}</td>
+                <td>{{ getValue(v, 'covdesc') }}</td>
+                <td>{{ getValue(v, 'vecatg') }}</td>
+                <td>{{ getValue(v, 'dcCovStatus') }}</td>
+                <td>{{ getValue(v, 'dcIssuedt') }}</td>
+                <td>{{ getValue(v, 'dcEndorsedt') }}</td>
+                <td>{{ getValue(v, 'dcEndorseNo') }}</td>
+                <td>{{ getValue(v, 'olaName') }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Transaction History -->
+      <div class="card detail-card" *ngIf="transactions.length">
+        <div class="card-title">Transaction History ({{ transactions.length }})</div>
+        <div class="table-scroll">
+          <table class="result-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Transaction</th>
+                <th>Office</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let t of transactions">
+                <td>{{ getValue(t, 'trEntrydt') }}</td>
+                <td>{{ getValue(t, 'trName') }}</td>
+                <td>{{ getValue(t, 'olaOffName') }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </ng-container>
+  </ng-container>
+
+</div>

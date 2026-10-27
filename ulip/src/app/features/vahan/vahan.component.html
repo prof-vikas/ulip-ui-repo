@@ -1,0 +1,148 @@
+<div class="page-container">
+
+  <app-back-button></app-back-button>
+
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="breadcrumb">Vahan &rsaquo; Vahan {{ vahanNumber }}</div>
+    <h1 class="page-title">Vahan {{ vahanNumber }}</h1>
+    <p class="page-desc">
+      <ng-container *ngIf="vahanNumber === '04'">Search vehicle details by Registration Number</ng-container>
+      <ng-container *ngIf="vahanNumber === '05'">Search vehicle details by Chassis Number</ng-container>
+      <ng-container *ngIf="vahanNumber === '06'">Search vehicle details by Engine Number</ng-container>
+      <ng-container *ngIf="vahanNumber !== '04' && vahanNumber !== '05' && vahanNumber !== '06'">
+        Query vehicle information via Vahan {{ vahanNumber }} API
+      </ng-container>
+    </p>
+  </div>
+
+  <!-- Input Card -->
+  <div class="card">
+    <div class="card-title">Request Parameters</div>
+    <form (ngSubmit)="onSubmit()">
+      <div class="form-grid">
+        <div class="form-group" *ngFor="let field of fields">
+          <label [for]="field.key">{{ field.label }} <span class="required">*</span></label>
+          <input
+            [id]="field.key"
+            [type]="field.type"
+            [placeholder]="field.placeholder"
+            [(ngModel)]="formData[field.key]"
+            [name]="field.key"
+            autocomplete="off"
+            maxlength="64"
+            [class.field-invalid]="submitted && !formData[field.key]?.trim()"
+          />
+          <span class="error-text" *ngIf="submitted && !formData[field.key]?.trim()">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12" y2="16"/></svg>
+            {{ field.label }} is required
+          </span>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button type="submit" class="btn-primary" [disabled]="loading">
+          <span *ngIf="!loading">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:6px;vertical-align:middle">
+              <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+            </svg>
+            Search
+          </span>
+          <span *ngIf="loading" class="spinner"></span>
+        </button>
+        <button type="button" class="btn-secondary" (click)="clearForm()">Clear</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Error Alert -->
+  <div class="alert-error" *ngIf="errorMessage">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0">
+      <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12" y2="16"/>
+    </svg>
+    <span>{{ errorMessage }}</span>
+  </div>
+
+  <!-- Response: Status Banner -->
+  <ng-container *ngIf="apiResponse">
+    <div class="status-banner" [class.status-success]="hasVehicleDetails" [class.status-error]="!hasVehicleDetails && apiResponse">
+      <div class="status-left">
+        <span class="status-dot"></span>
+        <div>
+          <div class="status-title">{{ hasVehicleDetails ? 'Record Found' : 'Query Failed' }}</div>
+          <div class="status-sub">{{ apiResponse.message || (hasVehicleDetails ? 'Success' : 'Failed') }} &nbsp;·&nbsp; Code {{ apiResponse.code }}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Vehicle Detail Cards: show whenever vehicleDetails is present (works for 04, 05, 06) -->
+    <ng-container *ngIf="hasVehicleDetails">
+
+      <!-- Section: Vehicle Identity -->
+      <div class="card detail-card">
+        <div class="card-title">Vehicle Identity</div>
+        <div class="detail-grid">
+          <div class="detail-item" *ngFor="let f of importantFields.slice(0, 4)">
+            <span class="detail-label">{{ f.label }}</span>
+            <span class="detail-value">{{ getFieldValue(f.key) }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section: Registration & Location -->
+      <div class="card detail-card">
+        <div class="card-title">Registration &amp; Location</div>
+        <div class="detail-grid">
+          <div class="detail-item" *ngFor="let f of importantFields.slice(4, 8)">
+            <span class="detail-label">{{ f.label }}</span>
+            <span class="detail-value">{{ getFieldValue(f.key) }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section: Vehicle Specifications -->
+      <div class="card detail-card">
+        <div class="card-title">Vehicle Specifications</div>
+        <div class="detail-grid">
+          <div class="detail-item" *ngFor="let f of importantFields.slice(8, 21)">
+            <span class="detail-label">{{ f.label }}</span>
+            <span class="detail-value">{{ getFieldValue(f.key) }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section: Finance & Validity -->
+      <div class="card detail-card">
+        <div class="card-title">Finance &amp; Validity</div>
+        <div class="detail-grid">
+          <div class="detail-item" *ngFor="let f of importantFields.slice(21)">
+            <span class="detail-label">{{ f.label }}</span>
+            <span class="detail-value">{{ getFieldValue(f.key) }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Owner History -->
+      <div class="card detail-card" *ngIf="vehicleData && vehicleData.rcOwnerHistory && vehicleData.rcOwnerHistory.length">
+        <div class="card-title">Owner History</div>
+        <table class="owner-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Owner Name</th>
+              <th>RTO Office</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let owner of vehicleData.rcOwnerHistory">
+              <td>{{ owner.ownerSr }}</td>
+              <td>{{ owner.ownerName }}</td>
+              <td>{{ owner.offName }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </ng-container>
+  </ng-container>
+
+</div>

@@ -1,0 +1,31 @@
+export const environment = {
+  production: false,
+  // apiBaseUrl: '/ulip/api',
+    apiBaseUrl: 'https://ulip.surajinformatics.in/ulip/api',
+  endpoints: {
+    login: '/ulip/auth/login',
+    vahan01: '/vahan/01',
+    vahan02: '/vahan/02',
+    vahan03: '/vahan/03',
+    vahan04: '/ulip/vahan/getVahanDetails/04',
+    vahan05: '/ulip/vahan/getVahanDetails/05',
+    vahan06: '/ulip/vahan/getVahanDetails/06',
+    sarathi: '/ulip/getSarathiDetails',
+    fastag: '/fastag',
+    fois: '/fois',
+    ewaybill: '/ulip/getEWayBillDetails',
+    icegate01: '/ulip/getIcegate01Details',
+    icegate02: '/ulip/getIcegate02Details',
+    icegate03: '/ulip/getIcegate03Details',
+    icegate04: '/ulip/getIcegate04Details',
+    icegate05: '/ulip/getIcegate05Details',
+    icegate06: '/ulip/getIcegate06Details',
+    icegate07: '/ulip/getIcegate07Details',
+    icegate08: '/ulip/getIcegate08Details',
+    icegate09: '/ulip/getIcegate09Details',
+    icegate10: '/ulip/getIcegate10Details',
+    icegate11: '/ulip/getIcegate11Details',
+    icegate12: '/ulip/getIcegate12Details',
+    icegate13: '/ulip/getIcegate13Details'
+  }
+};

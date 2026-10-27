@@ -1,0 +1,120 @@
+<div class="page-container">
+
+  <app-back-button></app-back-button>
+
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="breadcrumb">ICE GATE &rsaquo; ICE GATE {{ iceGateNumber }}</div>
+    <h1 class="page-title">ICE GATE {{ iceGateNumber }}</h1>
+    <p class="page-desc">Query customs data via ICE GATE {{ iceGateNumber }} API</p>
+  </div>
+
+  <!-- Input Card -->
+  <div class="card">
+    <div class="card-title">Request Parameters</div>
+    <form (ngSubmit)="onSubmit()">
+      <div class="form-grid">
+        <div class="form-group" *ngFor="let field of fields">
+          <label [for]="field.key">{{ field.label }} <span class="required">*</span></label>
+          <input
+            [id]="field.key"
+            [type]="field.type"
+            [placeholder]="field.placeholder"
+            [(ngModel)]="formData[field.key]"
+            [name]="field.key"
+            autocomplete="off"
+            maxlength="64"
+            [class.field-invalid]="submitted && !formData[field.key]?.trim()"
+          />
+          <span class="error-text" *ngIf="submitted && !formData[field.key]?.trim()">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12" y2="16"/></svg>
+            {{ field.label }} is required
+          </span>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button type="submit" class="btn-primary" [disabled]="loading">
+          <span *ngIf="!loading">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:6px;vertical-align:middle">
+              <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+            </svg>
+            Search
+          </span>
+          <span *ngIf="loading" class="spinner"></span>
+        </button>
+        <button type="button" class="btn-secondary" (click)="clearForm()">Clear</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Error Alert -->
+  <div class="alert-error" *ngIf="errorMessage">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0">
+      <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12" y2="16"/>
+    </svg>
+    <span>{{ errorMessage }}</span>
+  </div>
+
+  <!-- Response: Status Banner -->
+  <ng-container *ngIf="apiResponse">
+    <div class="status-banner" [class.status-success]="hasAnyResult" [class.status-error]="!hasAnyResult">
+      <div class="status-left">
+        <span class="status-dot"></span>
+        <div>
+          <div class="status-title">{{ hasAnyResult ? 'Record Found' : 'Query Failed' }}</div>
+          <div class="status-sub">{{ apiResponse.message || (hasAnyResult ? 'Success' : 'Failed') }} &nbsp;·&nbsp; Code {{ apiResponse.code }}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Single-record result: rendered dynamically since ICE GATE sub-APIs have no fixed schema -->
+    <div class="card detail-card" *ngIf="hasResultData">
+      <div class="card-title">Result Details</div>
+      <div class="detail-grid">
+        <div class="detail-item" *ngFor="let entry of resultEntries">
+          <span class="detail-label">{{ entry.label }}</span>
+          <span class="detail-value">{{ entry.value }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Multi-row result: some ICE GATE sub-APIs (e.g. flight manifests) return a list -->
+    <div class="card detail-card" *ngIf="hasResultList">
+      <div class="card-title">Result Records ({{ resultTableRows.length }})</div>
+      <div class="table-scroll">
+        <table class="result-table">
+          <thead>
+            <tr>
+              <th *ngFor="let col of resultColumnLabels">{{ col }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let row of resultTableRows">
+              <td *ngFor="let cell of row">{{ cell }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Nested lists inside a single-record result (e.g. container details within an ICD BL status) -->
+    <div class="card detail-card" *ngFor="let list of resultNestedLists">
+      <div class="card-title">{{ list.title }} ({{ list.rows.length }})</div>
+      <div class="table-scroll">
+        <table class="result-table">
+          <thead>
+            <tr>
+              <th *ngFor="let col of list.columnLabels">{{ col }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let row of list.rows">
+              <td *ngFor="let cell of row">{{ cell }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </ng-container>
+
+</div>
