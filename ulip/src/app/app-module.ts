@@ -8,6 +8,7 @@ import { App } from './app';
 
 import { JwtInterceptor } from './core/interceptors/jwt.interceptor';
 
+import { MenuHomeComponent } from './core/menu/menu-home.component';
 import { LoginComponent } from './features/login/login.component';
 import { DashboardComponent } from './features/dashboard/dashboard.component';
 import { VahanComponent } from './features/vahan/vahan.component';
@@ -37,7 +38,8 @@ import { BackButtonComponent } from './shared/back-button/back-button.component'
     IceGateComponent,
     SidenavComponent,
     ThemeToggleComponent,
-    BackButtonComponent
+    BackButtonComponent,
+    MenuHomeComponent
   ],
   imports: [
     BrowserModule,

@@ -1,5 +1,10 @@
 export const environment = {
   production: false,
+  // Build-time menu. Pick the modules the sidebar should expose, then build.
+  //   'all'                                   -> Vahan, Sarathi, FASTag, FOIS, E-Way Bill, ICE GATE
+  //   ['icegate']                             -> ICE GATE only
+  //   ['icegate', 'ewaybill']                 -> ICE GATE + E-Way Bill
+  menuModules: 'all',
   // apiBaseUrl: '/ulip/api',
     apiBaseUrl: 'https://ulip.surajinformatics.in/ulip/api',
   endpoints: {
@@ -14,18 +19,18 @@ export const environment = {
     fastag: '/fastag',
     fois: '/fois',
     ewaybill: '/ulip/getEWayBillDetails',
-    icegate01: '/ulip/getIcegate01Details',
-    icegate02: '/ulip/getIcegate02Details',
-    icegate03: '/ulip/getIcegate03Details',
-    icegate04: '/ulip/getIcegate04Details',
-    icegate05: '/ulip/getIcegate05Details',
-    icegate06: '/ulip/getIcegate06Details',
-    icegate07: '/ulip/getIcegate07Details',
-    icegate08: '/ulip/getIcegate08Details',
-    icegate09: '/ulip/getIcegate09Details',
-    icegate10: '/ulip/getIcegate10Details',
-    icegate11: '/ulip/getIcegate11Details',
-    icegate12: '/ulip/getIcegate12Details',
-    icegate13: '/ulip/getIcegate13Details'
+    icegate01: '/ulip/icegate/v1/01',
+    icegate02: '/ulip/icegate/v1/02',
+    icegate03: '/ulip/icegate/v1/03',
+    icegate04: '/ulip/icegate/v1/04',
+    icegate05: '/ulip/icegate/v1/05',
+    icegate06: '/ulip/icegate/v1/06',
+    icegate07: '/ulip/icegate/v1/07',
+    icegate08: '/ulip/icegate/v1/08',
+    icegate09: '/ulip/icegate/v1/09',
+    icegate10: '/ulip/icegate/v1/10',
+    icegate11: '/ulip/icegate/v1/11',
+    icegate12: '/ulip/icegate/v1/12',
+    icegate13: '/ulip/icegate/v1/13'
   }
 };

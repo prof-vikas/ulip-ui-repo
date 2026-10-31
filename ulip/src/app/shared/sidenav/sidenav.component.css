@@ -57,6 +57,7 @@
   margin: 0;
   padding: 0 10px;
   flex: 1;
+  min-height: 0; /* allow the list to scroll inside the 100vh column instead of overflowing */
   overflow-y: auto;
 }
 
@@ -132,7 +133,10 @@
 }
 
 .sub-menu.open {
-  max-height: 400px;
+  /* No fixed pixel cap: a hard max-height clipped the last entries
+     (ICE GATE 13 was cut off at 400px). 100vh lets every child render;
+     the parent .nav-list scrolls if the menu is taller than the viewport. */
+  max-height: 100vh;
 }
 
 .sub-item {

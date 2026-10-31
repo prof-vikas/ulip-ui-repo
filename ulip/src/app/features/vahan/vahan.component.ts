@@ -36,6 +36,40 @@ export interface VehicleDetails {
   rcUnldWt?: string;
   rcOwnerHistory?: { ownerSr: number; ownerName: string; offName: string }[];
   stautsMessage?: string;
+  // ---- Vahan 01 extras ----
+  statusMessage?: string;
+  rcRegnUpto?: string;
+  rcPurchaseDt?: string;
+  rcOwnerSr?: number;
+  rcFName?: string | null;
+  rcMobileNo?: string | null;
+  rcPresentAddress?: string;
+  stateCd?: string;
+  rtoCd?: number;
+  rcVchCatg?: string;
+  rcNpUpto?: string | null;
+  rcNpIssuedBy?: string | null;
+  rcStatusAsOn?: string;
+  rcPuccUpto?: string;
+  rcPuccNo?: string;
+  rcNcrbStatus?: string | null;
+  rcBlacklistStatus?: string;
+  rcNocDetails?: string;
+  rcWheelbase?: number;
+  rcSleeperCap?: number;
+  rcStandCap?: number;
+  tempPermit?: TempPermit | null;
+}
+
+export interface TempPermit {
+  rcPermitCode?: string | null;
+  rcPermitIssueDt?: string | null;
+  rcPermitCatg?: string | null;
+  rcPermitNo?: string | null;
+  rcPermitType?: string | null;
+  rcPermitValidFrom?: string | null;
+  rcPermitValidUpto?: string | null;
+  rcPermitPurCd?: string | null;
 }
 
 interface ApiResponse {
@@ -114,6 +148,116 @@ export class VahanComponent implements OnInit {
     { label: 'Insurance Valid Upto',  key: 'rcInsuranceUpto' },
     { label: 'RC Status',             key: 'rcStatus' }
   ];
+
+  // Vahan 01 returns a wider payload than 04/05/06 (extra registration, address,
+  // PUCC, NOC and non-use fields) plus a nested `tempPermit` object, so it gets
+  // its own field set instead of reusing the 04 column layout.
+  private readonly sections01: { title: string; fields: { label: string; key: keyof VehicleDetails }[] }[] = [
+    {
+      title: 'Vehicle Identity',
+      fields: [
+        { label: 'Registration Number',  key: 'rcRegnNo' },
+        { label: 'Registration Date',    key: 'rcRegnDt' },
+        { label: 'Registration Valid Upto', key: 'rcRegnUpto' },
+        { label: 'Owner Serial No.',     key: 'rcOwnerSr' },
+        { label: 'Owner Name',           key: 'rcOwnerName' },
+        { label: "Father's Name",        key: 'rcFName' },
+        { label: 'Mobile Number',        key: 'rcMobileNo' }
+      ]
+    },
+    {
+      title: 'Registration & Location',
+      fields: [
+        { label: 'Permanent Address',    key: 'rcPermanentAddress' },
+        { label: 'Present Address',      key: 'rcPresentAddress' },
+        { label: 'Registered At',        key: 'rcRegisteredAt' },
+        { label: 'State Code',           key: 'stateCd' },
+        { label: 'RTO Code',             key: 'rtoCd' },
+        { label: 'Purchase Date',        key: 'rcPurchaseDt' }
+      ]
+    },
+    {
+      title: 'Vehicle Specifications',
+      fields: [
+        { label: 'Vehicle Class',        key: 'rcVhClassDesc' },
+        { label: 'Vehicle Category',     key: 'rcVchCatg' },
+        { label: 'Body Type',            key: 'rcBodyTypeDesc' },
+        { label: 'Fuel Type',            key: 'rcFuelDesc' },
+        { label: 'Color',                key: 'rcColor' },
+        { label: 'Chassis Number',       key: 'rcChasiNo' },
+        { label: 'Engine Number',        key: 'rcEngNo' },
+        { label: 'Mfg. Month / Year',    key: 'rcManuMonthYr' },
+        { label: 'Cylinders',            key: 'rcNoCyl' },
+        { label: 'Cubic Capacity (cc)',  key: 'rcCubicCap' },
+        { label: 'Seating Capacity',     key: 'rcSeatCap' },
+        { label: 'Sleeper Capacity',     key: 'rcSleeperCap' },
+        { label: 'Standing Capacity',    key: 'rcStandCap' },
+        { label: 'Wheelbase (mm)',       key: 'rcWheelbase' },
+        { label: 'Unladen Weight (kg)',  key: 'rcUnldWt' },
+        { label: 'Gross Vehicle Weight (kg)', key: 'rcGvw' },
+        { label: 'Emission Norms',       key: 'rcNormsDesc' }
+      ]
+    },
+    {
+      title: 'Finance & Validity',
+      fields: [
+        { label: 'Financer',             key: 'rcFinancer' },
+        { label: 'Sale Amount',          key: 'rcSaleAmt' },
+        { label: 'Tax Valid Upto',       key: 'rcTaxUpto' },
+        { label: 'Insurance Company',    key: 'rcInsuranceComp' },
+        { label: 'Insurance Policy No.', key: 'rcInsurancePolicyNo' },
+        { label: 'Insurance Valid Upto', key: 'rcInsuranceUpto' },
+        { label: 'PUCC Number',          key: 'rcPuccNo' },
+        { label: 'PUCC Valid Upto',      key: 'rcPuccUpto' },
+        { label: 'Non-Use Valid Upto',   key: 'rcNpUpto' },
+        { label: 'Non-Use Issued By',    key: 'rcNpIssuedBy' }
+      ]
+    },
+    {
+      title: 'Status & Flags',
+      fields: [
+        { label: 'RC Status',            key: 'rcStatus' },
+        { label: 'Status As On',         key: 'rcStatusAsOn' },
+        { label: 'Blacklist Status',     key: 'rcBlacklistStatus' },
+        { label: 'NOC Details',          key: 'rcNocDetails' },
+        { label: 'NCRB Status',          key: 'rcNcrbStatus' },
+        { label: 'API Status Message',   key: 'statusMessage' }
+      ]
+    }
+  ];
+
+  readonly permitFields: { label: string; key: keyof TempPermit }[] = [
+    { label: 'Permit Number',   key: 'rcPermitNo' },
+    { label: 'Permit Type',     key: 'rcPermitType' },
+    { label: 'Permit Category', key: 'rcPermitCatg' },
+    { label: 'Permit Code',     key: 'rcPermitCode' },
+    { label: 'Issued On',       key: 'rcPermitIssueDt' },
+    { label: 'Valid From',      key: 'rcPermitValidFrom' },
+    { label: 'Valid Upto',      key: 'rcPermitValidUpto' },
+    { label: 'Purpose Code',    key: 'rcPermitPurCd' }
+  ];
+
+  // 01 gets its own sections; 04/05/06 keep the original 4-card grouping.
+  get sections(): { title: string; fields: { label: string; key: keyof VehicleDetails }[] }[] {
+    if (this.vahanNumber === '01') return this.sections01;
+    return [
+      { title: 'Vehicle Identity',        fields: this.importantFields.slice(0, 4) },
+      { title: 'Registration & Location', fields: this.importantFields.slice(4, 8) },
+      { title: 'Vehicle Specifications',  fields: this.importantFields.slice(8, 21) },
+      { title: 'Finance & Validity',      fields: this.importantFields.slice(21) }
+    ];
+  }
+
+  get permitData(): TempPermit | null {
+    const permit = (this.vehicleData as any)?.tempPermit;
+    return permit && typeof permit === 'object' ? (permit as TempPermit) : null;
+  }
+
+  getPermitValue(key: keyof TempPermit): string {
+    const val = this.permitData ? (this.permitData as any)[key] : null;
+    if (val === null || val === undefined || val === '') return '—';
+    return String(val);
+  }
 
   get fields() {
     return this.fieldConfigs[this.vahanNumber] || [];

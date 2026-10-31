@@ -90,7 +90,7 @@ export class IceGateComponent implements OnInit {
       { label: 'Location', key: 'location', type: 'text', placeholder: 'e.g. INCCU5' }
     ],
     '13': [
-      { label: 'Container Number', key: 'containerNumber', type: 'text', placeholder: 'e.g. TU679' },
+      { label: 'Container Number', key: 'containerNumber', type: 'text', placeholder: 'e.g. MSKU3663553' },
       { label: 'E-Seal Number', key: 'esealNumber', type: 'text', placeholder: 'e.g. 000000000045' }
     ]
   };

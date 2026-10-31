@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../../core/auth/auth.service';
+import { MenuModule, enabledModules } from '../../core/menu/menu-config';
 
 interface NavItem {
   label: string;
@@ -9,6 +10,7 @@ interface NavItem {
   overviewRoute?: string;  // parent navigates here when clicked
   children?: NavItem[];
   expanded?: boolean;
+  module: MenuModule;      // which environment menuModules entry controls visibility
 }
 
 @Component({
@@ -24,46 +26,61 @@ export class SidenavComponent {
     {
       label: 'Vahan',
       icon: '🚗',
+      module: 'vahan',
       overviewRoute: '/dashboard/vahan',
       expanded: false,
       children: [
-        { label: 'Vahan 01', icon: '', route: '/dashboard/vahan/01' },
-        { label: 'Vahan 02', icon: '', route: '/dashboard/vahan/02' },
-        { label: 'Vahan 03', icon: '', route: '/dashboard/vahan/03' },
-        { label: 'Vahan 04', icon: '', route: '/dashboard/vahan/04' },
-        { label: 'Vahan 05', icon: '', route: '/dashboard/vahan/05' },
-        { label: 'Vahan 06', icon: '', route: '/dashboard/vahan/06' }
+        { label: 'Vahan 01', icon: '', module: 'vahan', route: '/dashboard/vahan/01' },
+        // Deprecated APIs - hidden from the menu, kept for reference.
+        // { label: 'Vahan 02', icon: '', module: 'vahan', route: '/dashboard/vahan/02' },
+        // { label: 'Vahan 03', icon: '', module: 'vahan', route: '/dashboard/vahan/03' },
+        { label: 'Vahan 04', icon: '', module: 'vahan', route: '/dashboard/vahan/04' },
+        { label: 'Vahan 05', icon: '', module: 'vahan', route: '/dashboard/vahan/05' }
+        // { label: 'Vahan 06', icon: '', module: 'vahan', route: '/dashboard/vahan/06' }
       ]
     },
-    { label: 'Sarathi',   icon: '📋', route: '/dashboard/sarathi' },
-    { label: 'FASTag',   icon: '🏷️', route: '/dashboard/fastag' },
-    { label: 'FOIS',      icon: '🚂', route: '/dashboard/fois' },
-    { label: 'E-Way Bill',icon: '📄', route: '/dashboard/ewaybill' },
+    { label: 'Sarathi',    icon: '📋', module: 'sarathi',  route: '/dashboard/sarathi' },
+    { label: 'FASTag',     icon: '🏷️', module: 'fastag',   route: '/dashboard/fastag' },
+    { label: 'FOIS',       icon: '🚂', module: 'fois',     route: '/dashboard/fois' },
+    { label: 'E-Way Bill', icon: '📄', module: 'ewaybill', route: '/dashboard/ewaybill' },
     {
       label: 'ICE GATE',
       icon: '⚓',
+      module: 'icegate',
       overviewRoute: '/dashboard/icegate',
       expanded: false,
       children: [
-        { label: 'ICE GATE 01', icon: '', route: '/dashboard/icegate/01' },
-        { label: 'ICE GATE 02', icon: '', route: '/dashboard/icegate/02' },
-        { label: 'ICE GATE 03', icon: '', route: '/dashboard/icegate/03' },
-        { label: 'ICE GATE 04', icon: '', route: '/dashboard/icegate/04' },
-        { label: 'ICE GATE 05', icon: '', route: '/dashboard/icegate/05' },
-        { label: 'ICE GATE 06', icon: '', route: '/dashboard/icegate/06' },
-        { label: 'ICE GATE 07', icon: '', route: '/dashboard/icegate/07' },
-        { label: 'ICE GATE 08', icon: '', route: '/dashboard/icegate/08' },
-        { label: 'ICE GATE 09', icon: '', route: '/dashboard/icegate/09' },
-        { label: 'ICE GATE 10', icon: '', route: '/dashboard/icegate/10' },
-        { label: 'ICE GATE 11', icon: '', route: '/dashboard/icegate/11' },
-        { label: 'ICE GATE 12', icon: '', route: '/dashboard/icegate/12' },
-        { label: 'ICE GATE 13', icon: '', route: '/dashboard/icegate/13' }
+        { label: 'ICE GATE 01', icon: '', module: 'icegate', route: '/dashboard/icegate/01' },
+        { label: 'ICE GATE 02', icon: '', module: 'icegate', route: '/dashboard/icegate/02' },
+        { label: 'ICE GATE 03', icon: '', module: 'icegate', route: '/dashboard/icegate/03' },
+        { label: 'ICE GATE 04', icon: '', module: 'icegate', route: '/dashboard/icegate/04' },
+        { label: 'ICE GATE 05', icon: '', module: 'icegate', route: '/dashboard/icegate/05' },
+        { label: 'ICE GATE 06', icon: '', module: 'icegate', route: '/dashboard/icegate/06' },
+        { label: 'ICE GATE 07', icon: '', module: 'icegate', route: '/dashboard/icegate/07' },
+        { label: 'ICE GATE 08', icon: '', module: 'icegate', route: '/dashboard/icegate/08' },
+        { label: 'ICE GATE 09', icon: '', module: 'icegate', route: '/dashboard/icegate/09' },
+        { label: 'ICE GATE 10', icon: '', module: 'icegate', route: '/dashboard/icegate/10' },
+        { label: 'ICE GATE 11', icon: '', module: 'icegate', route: '/dashboard/icegate/11' },
+        { label: 'ICE GATE 12', icon: '', module: 'icegate', route: '/dashboard/icegate/12' },
+        { label: 'ICE GATE 13', icon: '', module: 'icegate', route: '/dashboard/icegate/13' }
       ]
     }
   ];
 
   constructor(private authService: AuthService, private router: Router) {
     this.userName = this.authService.getUser();
+
+    // Build-time scope: only the modules listed in environment.menuModules are
+    // shown, in the order they were listed there.
+    const enabled = enabledModules();
+    this.navItems = enabled
+      .map(module => this.navItems.find(item => item.module === module))
+      .filter((item): item is NavItem => !!item);
+
+    // A single remaining module opens expanded, so its APIs are one glance away.
+    if (this.navItems.length === 1) {
+      this.navItems[0].expanded = true;
+    }
   }
 
   toggleExpand(item: NavItem): void {

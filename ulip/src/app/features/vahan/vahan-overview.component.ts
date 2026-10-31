@@ -27,8 +27,9 @@ export class VahanOverviewComponent {
       inputLabel: 'Vehicle Registration Number',
       inputExample: 'e.g. MH12AB1234',
       tag: 'Reg. No.',
-      available: false
+      available: true
     },
+    /* Deprecated: Vahan 02 hidden from the section, kept for reference.
     {
       id: '02',
       title: 'Vahan 02',
@@ -47,6 +48,7 @@ export class VahanOverviewComponent {
       tag: 'Reg. No.',
       available: false
     },
+    */
     {
       id: '04',
       title: 'Vahan 04',
@@ -64,7 +66,9 @@ export class VahanOverviewComponent {
       inputExample: 'e.g. MAT447230H3F13971',
       tag: 'Chassis No.',
       available: true
-    },
+    }
+    /* Deprecated: Vahan 06 hidden from the section, kept for reference.
+    ,
     {
       id: '06',
       title: 'Vahan 06',
@@ -74,6 +78,7 @@ export class VahanOverviewComponent {
       tag: 'Engine No.',
       available: true
     }
+    */
   ];
 
   constructor(private router: Router) {}

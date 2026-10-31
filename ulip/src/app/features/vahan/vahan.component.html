@@ -7,10 +7,11 @@
     <div class="breadcrumb">Vahan &rsaquo; Vahan {{ vahanNumber }}</div>
     <h1 class="page-title">Vahan {{ vahanNumber }}</h1>
     <p class="page-desc">
+      <ng-container *ngIf="vahanNumber === '01'">Search vehicle details by Registration Number — full RC, PUCC and permit record</ng-container>
       <ng-container *ngIf="vahanNumber === '04'">Search vehicle details by Registration Number</ng-container>
       <ng-container *ngIf="vahanNumber === '05'">Search vehicle details by Chassis Number</ng-container>
       <ng-container *ngIf="vahanNumber === '06'">Search vehicle details by Engine Number</ng-container>
-      <ng-container *ngIf="vahanNumber !== '04' && vahanNumber !== '05' && vahanNumber !== '06'">
+      <ng-container *ngIf="vahanNumber !== '01' && vahanNumber !== '04' && vahanNumber !== '05' && vahanNumber !== '06'">
         Query vehicle information via Vahan {{ vahanNumber }} API
       </ng-container>
     </p>
@@ -77,46 +78,24 @@
     <!-- Vehicle Detail Cards: show whenever vehicleDetails is present (works for 04, 05, 06) -->
     <ng-container *ngIf="hasVehicleDetails">
 
-      <!-- Section: Vehicle Identity -->
-      <div class="card detail-card">
-        <div class="card-title">Vehicle Identity</div>
+      <!-- Detail sections: Vahan 01 uses its own field set, 04/05/06 keep the classic grouping -->
+      <div class="card detail-card" *ngFor="let section of sections">
+        <div class="card-title">{{ section.title }}</div>
         <div class="detail-grid">
-          <div class="detail-item" *ngFor="let f of importantFields.slice(0, 4)">
+          <div class="detail-item" *ngFor="let f of section.fields">
             <span class="detail-label">{{ f.label }}</span>
             <span class="detail-value">{{ getFieldValue(f.key) }}</span>
           </div>
         </div>
       </div>
 
-      <!-- Section: Registration & Location -->
-      <div class="card detail-card">
-        <div class="card-title">Registration &amp; Location</div>
+      <!-- Vahan 01 nests permit details in `tempPermit` -->
+      <div class="card detail-card" *ngIf="permitData">
+        <div class="card-title">Permit Details</div>
         <div class="detail-grid">
-          <div class="detail-item" *ngFor="let f of importantFields.slice(4, 8)">
+          <div class="detail-item" *ngFor="let f of permitFields">
             <span class="detail-label">{{ f.label }}</span>
-            <span class="detail-value">{{ getFieldValue(f.key) }}</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Section: Vehicle Specifications -->
-      <div class="card detail-card">
-        <div class="card-title">Vehicle Specifications</div>
-        <div class="detail-grid">
-          <div class="detail-item" *ngFor="let f of importantFields.slice(8, 21)">
-            <span class="detail-label">{{ f.label }}</span>
-            <span class="detail-value">{{ getFieldValue(f.key) }}</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Section: Finance & Validity -->
-      <div class="card detail-card">
-        <div class="card-title">Finance &amp; Validity</div>
-        <div class="detail-grid">
-          <div class="detail-item" *ngFor="let f of importantFields.slice(21)">
-            <span class="detail-label">{{ f.label }}</span>
-            <span class="detail-value">{{ getFieldValue(f.key) }}</span>
+            <span class="detail-value">{{ getPermitValue(f.key) }}</span>
           </div>
         </div>
       </div>
