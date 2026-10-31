@@ -5,6 +5,8 @@
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
+    "build:war": "node scripts/build-war.mjs",
+    "deploy:tomcat": "node scripts/deploy-tomcat.mjs",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "start:local": "ng serve --configuration local --port 4201"

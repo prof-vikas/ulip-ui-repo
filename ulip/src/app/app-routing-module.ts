@@ -11,6 +11,7 @@ import { EwaybillComponent } from './features/ewaybill/ewaybill.component';
 import { IceGateOverviewComponent } from './features/icegate/icegate-overview.component';
 import { IceGateComponent } from './features/icegate/icegate.component';
 import { AuthGuard } from './core/auth/auth.guard';
+import { MenuHomeComponent } from './core/menu/menu-home.component';
 
 const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
@@ -20,7 +21,7 @@ const routes: Routes = [
     component: DashboardComponent,
     canActivate: [AuthGuard],
     children: [
-      { path: '',           redirectTo: 'vahan',     pathMatch: 'full' },
+      { path: '',        pathMatch: 'full', component: MenuHomeComponent },
       { path: 'vahan',      component: VahanOverviewComponent },
       { path: 'vahan/:id',  component: VahanComponent },
       { path: 'sarathi',   component: SarathiComponent },
