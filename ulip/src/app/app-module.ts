@@ -1,16 +1,17 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
-import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 
 import { AppRoutingModule } from './app-routing-module';
 import { App } from './app';
+import { SharedModule } from './shared/shared.module';
 
 import { JwtInterceptor } from './core/interceptors/jwt.interceptor';
 
 import { MenuHomeComponent } from './core/menu/menu-home.component';
-import { LoginComponent } from './features/login/login.component';
+import { ModuleOverviewComponent } from './core/menu/module-overview.component';
 import { DashboardComponent } from './features/dashboard/dashboard.component';
+import { HomeComponent } from './features/home/home.component';
 import { VahanComponent } from './features/vahan/vahan.component';
 import { VahanOverviewComponent } from './features/vahan/vahan-overview.component';
 import { SarathiComponent } from './features/sarathi/sarathi.component';
@@ -20,14 +21,16 @@ import { EwaybillComponent } from './features/ewaybill/ewaybill.component';
 import { IceGateOverviewComponent } from './features/icegate/icegate-overview.component';
 import { IceGateComponent } from './features/icegate/icegate.component';
 import { SidenavComponent } from './shared/sidenav/sidenav.component';
-import { ThemeToggleComponent } from './shared/theme-toggle/theme-toggle.component';
+import { TopbarComponent } from './shared/topbar/topbar.component';
+import { NotificationBellComponent } from './shared/topbar/notification-bell.component';
+import { ApiAccessBarComponent } from './shared/api-access-bar/api-access-bar.component';
 import { BackButtonComponent } from './shared/back-button/back-button.component';
 
 @NgModule({
   declarations: [
     App,
-    LoginComponent,
     DashboardComponent,
+    HomeComponent,
     VahanComponent,
     VahanOverviewComponent,
     SarathiComponent,
@@ -37,15 +40,17 @@ import { BackButtonComponent } from './shared/back-button/back-button.component'
     IceGateOverviewComponent,
     IceGateComponent,
     SidenavComponent,
-    ThemeToggleComponent,
+    TopbarComponent,
+    NotificationBellComponent,
+    ApiAccessBarComponent,
     BackButtonComponent,
-    MenuHomeComponent
+    MenuHomeComponent,
+    ModuleOverviewComponent
   ],
   imports: [
     BrowserModule,
     AppRoutingModule,
-    ReactiveFormsModule,
-    FormsModule,
+    SharedModule,
     HttpClientModule
   ],
   providers: [

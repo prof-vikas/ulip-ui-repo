@@ -1,85 +1,75 @@
-<nav class="sidenav">
+<div class="sidenav-scrim" *ngIf="layout.mobileOpen()" (click)="layout.closeMobile()"></div>
+
+<nav class="sidenav" [class.collapsed]="layout.collapsed()" [class.mobile-open]="layout.mobileOpen()" aria-label="Main">
   <div class="sidenav-header">
-    <div class="logo-wrap">
-      <svg width="32" height="32" viewBox="0 0 40 40" fill="none">
-        <rect width="40" height="40" rx="10" fill="url(#sidenavLogoGrad)"/>
-        <path d="M8 20L20 8L32 20L20 32L8 20Z" fill="white" opacity="0.95"/>
-        <circle cx="20" cy="20" r="5" fill="#4F46E5"/>
-        <defs>
-          <linearGradient id="sidenavLogoGrad" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
-            <stop stop-color="#4F46E5"/>
-            <stop offset="1" stop-color="#7C3AED"/>
-          </linearGradient>
-        </defs>
-      </svg>
-    </div>
-    <div class="logo-text">
-      <span class="logo-title">SIPL</span>
-      <span class="logo-sub">API Library</span>
-    </div>
+    <a class="brand" routerLink="/dashboard" aria-label="Gativra — home">
+      <img class="brand-logo light-only" src="brand/gativra-logo.svg" alt="Gativra — Powering Smart Logistics" />
+      <img class="brand-logo dark-only" src="brand/gativra-logo-dark.svg" alt="Gativra — Powering Smart Logistics" />
+      <img class="brand-mark" src="favicon.svg" alt="Gativra" />
+    </a>
+    <button type="button" class="collapse-btn" (click)="layout.toggleCollapsed()"
+            [attr.aria-label]="layout.collapsed() ? 'Expand sidebar' : 'Collapse sidebar'"
+            [title]="layout.collapsed() ? 'Expand sidebar' : 'Collapse sidebar'">
+      <app-icon [name]="layout.collapsed() ? 'chevron-right' : 'chevron-left'" [size]="16"></app-icon>
+    </button>
   </div>
 
-  <div class="nav-section-label">MAIN MENU</div>
+  <div class="nav-scroll">
+    <div class="nav-section" *ngFor="let section of sections()">
+      <div class="nav-section-label">{{ section.label }}</div>
+      <ul class="nav-list">
+        <li *ngFor="let item of section.items" class="nav-item-wrapper">
+          <!-- Parent with sub-pages (Vahan, ICE GATE) -->
+          <ng-container *ngIf="item.children.length; else leaf">
+            <button type="button" class="nav-item"
+                    [class.nav-item-active-parent]="isParentActive(item)"
+                    [attr.aria-expanded]="expanded.has(item.code)"
+                    [title]="item.label"
+                    (click)="toggle(item)">
+              <span class="nav-icon"><app-icon [name]="item.icon"></app-icon></span>
+              <span class="nav-label">{{ item.label }}</span>
+              <span class="nav-arrow" [class.rotated]="expanded.has(item.code)">
+                <app-icon name="chevron-right" [size]="14"></app-icon>
+              </span>
+            </button>
+            <ul class="sub-menu" [class.open]="expanded.has(item.code) && !layout.collapsed()">
+              <li *ngFor="let child of item.children">
+                <a class="nav-item sub-item" [routerLink]="child.route" [class.nav-item-active]="isActive(child)">
+                  <span class="sub-dot"></span>
+                  <span class="nav-label">{{ child.label }}</span>
+                </a>
+              </li>
+            </ul>
+          </ng-container>
 
-  <ul class="nav-list">
-    <li *ngFor="let item of navItems" class="nav-item-wrapper">
-      <!-- Parent item with children (Vahan) -->
-      <div
-        *ngIf="item.children"
-        class="nav-item"
-        [class.nav-item-active-parent]="isParentActive(item) || item.expanded"
-        (click)="toggleExpand(item)"
-      >
-        <span class="nav-icon">{{ item.icon }}</span>
-        <span class="nav-label">{{ item.label }}</span>
-        <span class="nav-arrow" [class.rotated]="item.expanded">&#8250;</span>
-      </div>
-
-      <!-- Sub-menu -->
-      <ul class="sub-menu" [class.open]="item.expanded">
-        <li *ngFor="let child of item.children">
-          <div
-            class="nav-item sub-item"
-            [class.nav-item-active]="isActive(child.route!)"
-            (click)="navigate(child.route!)"
-          >
-            <span class="sub-dot"></span>
-            <span class="nav-label">{{ child.label }}</span>
-          </div>
+          <ng-template #leaf>
+            <a class="nav-item" [routerLink]="item.route" [class.nav-item-active]="isActive(item)" [title]="item.label">
+              <span class="nav-icon">
+                <app-icon [name]="item.icon"></app-icon>
+                <span class="nav-dot" *ngIf="badgeFor(item.code) as n" [attr.data-kind]="item.code"></span>
+              </span>
+              <span class="nav-label">{{ item.label }}</span>
+              <span class="nav-badge" *ngIf="badgeFor(item.code) as n" [attr.data-kind]="item.code"
+                    [title]="item.code === 'ADMIN_APPROVALS' ? n + ' waiting for review' : n + ' awaiting approval'">{{ n > 99 ? '99+' : n }}</span>
+            </a>
+          </ng-template>
         </li>
       </ul>
+    </div>
 
-      <!-- Leaf item (no children) -->
-      <div
-        *ngIf="!item.children"
-        class="nav-item"
-        [class.nav-item-active]="isActive(item.route!)"
-        (click)="navigate(item.route!)"
-      >
-        <span class="nav-icon">{{ item.icon }}</span>
-        <span class="nav-label">{{ item.label }}</span>
-      </div>
-    </li>
-  </ul>
-
-  <div class="sidenav-theme-row">
-    <span class="theme-row-label">Appearance</span>
-    <app-theme-toggle></app-theme-toggle>
+    <div class="nav-empty" *ngIf="!sections().length">No pages are assigned to your role yet.</div>
   </div>
 
   <div class="sidenav-footer">
     <div class="user-info">
-      <div class="user-avatar">{{ (userName || 'U').charAt(0).toUpperCase() }}</div>
+      <div class="user-avatar">{{ initials() }}</div>
       <div class="user-details">
-        <span class="user-name">{{ userName }}</span>
-        <span class="user-role">Operator</span>
+        <span class="user-name">{{ user()?.name || user()?.username }}</span>
+        <span class="user-role">{{ (user()?.role || '') | titlecase }}</span>
       </div>
     </div>
-    <button class="btn-logout" (click)="logout()" title="Sign out">
-      <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-        <path stroke-linecap="round" stroke-linejoin="round"
-          d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H6a2 2 0 01-2-2V7a2 2 0 012-2h5a2 2 0 012 2v1"/>
-      </svg>
+    <button class="btn-logout" (click)="logout()" title="Sign out" aria-label="Sign out">
+      <app-icon name="logout" [size]="16"></app-icon>
     </button>
   </div>
 </nav>

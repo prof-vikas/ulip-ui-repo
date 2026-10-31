@@ -9,6 +9,10 @@ export const environment = {
   //   ['icegate', 'ewaybill']                 -> ICE GATE + E-Way Bill
   menuModules: 'all',
   apiBaseUrl: '',
+  // ulip-rbac (roles, menus, developer portal). Proxied to :8086 by proxy.local.conf.json.
+  rbacApiUrl: '/api/rbac/v1',
+  // Base URL of the SANDBOX ulip-rest (same paths as apiBaseUrl). Empty = sandbox calls from the portal are off.
+  sandboxApiBaseUrl: '',
   endpoints: {
     login: '/api/ulip/auth/login',
     vahan01: '/vahan/01',
@@ -18,8 +22,10 @@ export const environment = {
     vahan05: '/vahan/05',
     vahan06: '/vahan/06',
     sarathi: '/api/ulip/getSarathiDetails',
-    fastag: '/fastag',
-    fois: '/fois',
+    fastag: '/api/ulip/getFastagDetails',
+    fastag02: '/api/ulip/getFastagTwoDetails',
+    fois: '/api/ulip/getFoisDetails',
+    fois02: '/api/ulip/getFoisDetails/02',
     ewaybill: '/api/ulip/getEWayBillDetails',
     icegate01: '/api/ulip/icegate/v1/01',
     icegate02: '/api/ulip/icegate/v1/02',

@@ -1,18 +1,40 @@
-import { Component } from '@angular/core';
-import { Router } from '@angular/router';
+import { Component, computed } from '@angular/core';
+import { NavigationEnd, Router } from '@angular/router';
+import { filter } from 'rxjs';
 import { AuthService } from '../../core/auth/auth.service';
-import { MenuModule, enabledModules } from '../../core/menu/menu-config';
+import { LayoutService } from '../../core/layout/layout.service';
+import { InboxService } from '../../core/inbox/inbox.service';
+import { MenuNode } from '../../core/api/rbac.models';
+import { isModuleEnabled, menuPathToRoute, moduleForMenuCode } from '../../core/menu/menu-config';
 
 interface NavItem {
+  code: string;
   label: string;
-  icon: string;
-  route?: string;
-  overviewRoute?: string;  // parent navigates here when clicked
-  children?: NavItem[];
-  expanded?: boolean;
-  module: MenuModule;      // which environment menuModules entry controls visibility
+  icon?: string;
+  route: string | null;
+  children: NavItem[];
 }
 
+interface NavSection {
+  label: string;
+  items: NavItem[];
+}
+
+const SECTION_OF: Record<string, string> = {
+  DASHBOARD: 'Overview',
+  CATALOG: 'Developer',
+  ACCESS: 'Developer',
+  KEYS: 'Developer',
+  USAGE: 'Developer',
+  DOCS: 'Developer',
+  PROFILE: 'Account'
+};
+const SECTION_ORDER = ['Overview', 'Data APIs', 'Developer', 'Account'];
+
+/**
+ * Sidebar built from the user's ulip-rbac menu (GET /me/navigation), so it follows the role.
+ * Data modules are additionally limited by the build's menuModules.
+ */
 @Component({
   selector: 'app-sidenav',
   standalone: false,
@@ -20,96 +42,115 @@ interface NavItem {
   styleUrls: ['./sidenav.component.css']
 })
 export class SidenavComponent {
-  userName: string | null;
+  readonly sections = computed(() => this.buildSections(this.auth.navigation()));
+  expanded = new Set<string>();
+  url = '';
 
-  navItems: NavItem[] = [
-    {
-      label: 'Vahan',
-      icon: '🚗',
-      module: 'vahan',
-      overviewRoute: '/dashboard/vahan',
-      expanded: false,
-      children: [
-        { label: 'Vahan 01', icon: '', module: 'vahan', route: '/dashboard/vahan/01' },
-        // Deprecated APIs - hidden from the menu, kept for reference.
-        // { label: 'Vahan 02', icon: '', module: 'vahan', route: '/dashboard/vahan/02' },
-        // { label: 'Vahan 03', icon: '', module: 'vahan', route: '/dashboard/vahan/03' },
-        { label: 'Vahan 04', icon: '', module: 'vahan', route: '/dashboard/vahan/04' },
-        { label: 'Vahan 05', icon: '', module: 'vahan', route: '/dashboard/vahan/05' }
-        // { label: 'Vahan 06', icon: '', module: 'vahan', route: '/dashboard/vahan/06' }
-      ]
-    },
-    { label: 'Sarathi',    icon: '📋', module: 'sarathi',  route: '/dashboard/sarathi' },
-    { label: 'FASTag',     icon: '🏷️', module: 'fastag',   route: '/dashboard/fastag' },
-    { label: 'FOIS',       icon: '🚂', module: 'fois',     route: '/dashboard/fois' },
-    { label: 'E-Way Bill', icon: '📄', module: 'ewaybill', route: '/dashboard/ewaybill' },
-    {
-      label: 'ICE GATE',
-      icon: '⚓',
-      module: 'icegate',
-      overviewRoute: '/dashboard/icegate',
-      expanded: false,
-      children: [
-        { label: 'ICE GATE 01', icon: '', module: 'icegate', route: '/dashboard/icegate/01' },
-        { label: 'ICE GATE 02', icon: '', module: 'icegate', route: '/dashboard/icegate/02' },
-        { label: 'ICE GATE 03', icon: '', module: 'icegate', route: '/dashboard/icegate/03' },
-        { label: 'ICE GATE 04', icon: '', module: 'icegate', route: '/dashboard/icegate/04' },
-        { label: 'ICE GATE 05', icon: '', module: 'icegate', route: '/dashboard/icegate/05' },
-        { label: 'ICE GATE 06', icon: '', module: 'icegate', route: '/dashboard/icegate/06' },
-        { label: 'ICE GATE 07', icon: '', module: 'icegate', route: '/dashboard/icegate/07' },
-        { label: 'ICE GATE 08', icon: '', module: 'icegate', route: '/dashboard/icegate/08' },
-        { label: 'ICE GATE 09', icon: '', module: 'icegate', route: '/dashboard/icegate/09' },
-        { label: 'ICE GATE 10', icon: '', module: 'icegate', route: '/dashboard/icegate/10' },
-        { label: 'ICE GATE 11', icon: '', module: 'icegate', route: '/dashboard/icegate/11' },
-        { label: 'ICE GATE 12', icon: '', module: 'icegate', route: '/dashboard/icegate/12' },
-        { label: 'ICE GATE 13', icon: '', module: 'icegate', route: '/dashboard/icegate/13' }
-      ]
+  constructor(
+    private auth: AuthService,
+    private router: Router,
+    public layout: LayoutService,
+    private inbox: InboxService
+  ) {
+    this.url = this.router.url;
+    this.router.events.pipe(filter(e => e instanceof NavigationEnd)).subscribe(() => {
+      this.url = this.router.url.split('?')[0];
+      this.layout.closeMobile();
+      this.expandActive();
+    });
+    this.expandActive();
+  }
+
+  /** Pending counts on menu items: requests to review (approvers) and the user's own waiting requests. */
+  badgeFor(code: string): number {
+    if (code === 'ADMIN_APPROVALS') {
+      return this.inbox.approvalsPending();
     }
-  ];
+    if (code === 'ACCESS') {
+      return this.inbox.myPending();
+    }
+    return 0;
+  }
 
-  constructor(private authService: AuthService, private router: Router) {
-    this.userName = this.authService.getUser();
+  get user() {
+    return this.auth.user;
+  }
 
-    // Build-time scope: only the modules listed in environment.menuModules are
-    // shown, in the order they were listed there.
-    const enabled = enabledModules();
-    this.navItems = enabled
-      .map(module => this.navItems.find(item => item.module === module))
-      .filter((item): item is NavItem => !!item);
-
-    // A single remaining module opens expanded, so its APIs are one glance away.
-    if (this.navItems.length === 1) {
-      this.navItems[0].expanded = true;
+  toggle(item: NavItem): void {
+    if (this.expanded.has(item.code)) {
+      this.expanded.delete(item.code);
+    } else {
+      this.expanded.add(item.code);
+    }
+    if (item.route) {
+      this.router.navigateByUrl(item.route);
     }
   }
 
-  toggleExpand(item: NavItem): void {
-    if (item.children) {
-      item.expanded = !item.expanded;
-      // also navigate to the overview page
-      if (item.overviewRoute) {
-        this.router.navigate([item.overviewRoute]);
+  isActive(item: NavItem): boolean {
+    return !!item.route && this.url === item.route;
+  }
+
+  isParentActive(item: NavItem): boolean {
+    return item.children.some(c => this.isActive(c)) || this.isActive(item);
+  }
+
+  initials(): string {
+    const name = this.user()?.name || this.user()?.username || 'U';
+    return name.split(/\s+/).map(p => p.charAt(0)).join('').slice(0, 2).toUpperCase();
+  }
+
+  logout(): void {
+    this.auth.logout();
+    this.router.navigate(['/login']);
+  }
+
+  private expandActive(): void {
+    for (const s of this.sections()) {
+      for (const item of s.items) {
+        if (item.children.length && this.isParentActive(item)) {
+          this.expanded.add(item.code);
+        }
       }
     }
   }
 
-  navigate(route: string): void {
-    this.router.navigate([route]);
+  private buildSections(nodes: MenuNode[]): NavSection[] {
+    const sections = new Map<string, NavItem[]>();
+    const add = (label: string, item: NavItem) => {
+      sections.set(label, [...(sections.get(label) ?? []), item]);
+    };
+    for (const node of nodes) {
+      const module = moduleForMenuCode(node.code);
+      if (module && !isModuleEnabled(module)) {
+        continue;
+      }
+      const item = this.toItem(node);
+      if (module) {
+        add('Data APIs', item);
+      } else if (!node.path && item.children.length) {
+        // A group without its own page (Administration) becomes its own section.
+        sections.set(node.label, item.children);
+      } else {
+        add(SECTION_OF[node.code] ?? 'More', item);
+      }
+    }
+    const ordered = [...sections.keys()].sort((a, b) => this.rank(a) - this.rank(b));
+    return ordered.map(label => ({ label, items: sections.get(label)! }));
   }
 
-  isActive(route: string): boolean {
-    return this.router.url === route;
+  private rank(label: string): number {
+    const i = SECTION_ORDER.indexOf(label);
+    return i === -1 ? SECTION_ORDER.length + (label === 'More' ? 0 : 1) : i;
   }
 
-  isParentActive(item: NavItem): boolean {
-    if (!item.children) return false;
-    const url = this.router.url;
-    return item.children.some(c => c.route === url)
-      || (!!item.overviewRoute && url === item.overviewRoute);
-  }
-
-  logout(): void {
-    this.authService.logout();
-    this.router.navigate(['/login']);
+  private toItem(node: MenuNode): NavItem {
+    return {
+      code: node.code,
+      label: node.label,
+      icon: node.icon,
+      route: menuPathToRoute(node.path),
+      children: (node.children ?? []).map(c => this.toItem(c))
+    };
   }
 }

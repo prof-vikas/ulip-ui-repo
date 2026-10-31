@@ -4,9 +4,32 @@
   overflow: hidden;
 }
 
-.main-content {
+.main {
   flex: 1;
+  min-width: 0;
   overflow-y: auto;
   background: var(--color-bg);
-  padding: 32px;
+  /* Smooth, contained scrolling: in-page jumps glide, the scroll never chains to the body,
+     and the scrollbar's space is reserved so content does not shift when it appears. */
+  scroll-behavior: smooth;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+  -webkit-overflow-scrolling: touch;
+  scroll-padding-top: 76px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .main {
+    scroll-behavior: auto;
+  }
+}
+
+.main-content {
+  padding: 28px 32px 48px;
+}
+
+@media (max-width: 900px) {
+  .main-content {
+    padding: 20px 16px 40px;
+  }
 }

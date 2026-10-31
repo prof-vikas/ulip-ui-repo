@@ -1,0 +1,183 @@
+<!-- Hero -->
+<section class="hero">
+  <div class="hero-bg" aria-hidden="true"></div>
+  <div class="pub-wrap hero-grid">
+    <div class="hero-copy">
+      <span class="eyebrow-pill"><span class="live-dot"></span> Gativra API Platform · by Suraj Informatics</span>
+      <h1>India's logistics data, <span class="grad">one secure API away.</span></h1>
+      <p class="lead">
+        Verify vehicles, drivers, FASTag crossings, rail freight, e-way bills and customs records through one platform,
+        with sandbox credits to start and role-based access for your whole team.
+      </p>
+      <div class="cta-row">
+        <a class="btn btn-primary btn-lg" routerLink="/signup">Get sandbox access <app-icon name="arrow-right" [size]="16"></app-icon></a>
+        <a class="btn btn-lg" routerLink="/catalog">Explore the APIs</a>
+      </div>
+      <ul class="hero-trust">
+        <li><app-icon name="check-circle" [size]="15"></app-icon> Free sandbox credits</li>
+        <li><app-icon name="check-circle" [size]="15"></app-icon> 15-minute bearer tokens</li>
+        <li><app-icon name="check-circle" [size]="15"></app-icon> Built in India</li>
+      </ul>
+    </div>
+
+    <div class="console" aria-label="Example API call">
+      <div class="console-bar">
+        <span class="dots"><i></i><i></i><i></i></span>
+        <span class="console-title">Sarathi · licence check</span>
+        <span class="console-env">Sandbox</span>
+      </div>
+      <pre class="console-body"><code><span class="c">// request</span>
+{{ '{' }} <span class="k">"dlnumber"</span>: <span class="s">"MH0120190012345"</span>,
+  <span class="k">"dob"</span>: <span class="s">"1990-04-15"</span> {{ '}' }}
+
+<span class="c">// response (abridged) · 200 · 412 ms</span>
+{{ '{' }} <span class="k">"dlStatus"</span>: <span class="s">"Active"</span>,
+  <span class="k">"validTill"</span>: <span class="s">"2039-04-11"</span>,
+  <span class="k">"dlcovs"</span>: [<span class="s">"LMV"</span>, <span class="s">"MCWG"</span>] {{ '}' }}</code></pre>
+      <div class="console-foot">
+        <span><app-icon name="coins" [size]="13"></app-icon> 1 credit · 49 left</span>
+        <span class="ok"><app-icon name="check" [size]="13"></app-icon> Verified</span>
+      </div>
+      <div class="float-card fc-a"><app-icon name="tag" [size]="15"></app-icon><span><b>FASTag</b> Toll plaza crossed · 14:20</span></div>
+      <div class="float-card fc-b"><app-icon name="train" [size]="15"></app-icon><span><b>FOIS</b> Rake ETA 18:05</span></div>
+    </div>
+  </div>
+
+  <div class="pub-wrap">
+    <div class="stats">
+      <div *ngFor="let s of stats"><b>{{ s.value }}</b><span>{{ s.label }}</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- Data sources -->
+<section class="section" id="sources">
+  <div class="pub-wrap">
+    <div class="sec-head">
+      <span class="eyebrow">Data sources</span>
+      <h2>Six national systems, one integration</h2>
+      <p>Each source has its own reference page, request and response fields, status codes and code samples.</p>
+    </div>
+    <div class="src-grid">
+      <article class="src" *ngFor="let s of sources; let i = index" [style.animation-delay.ms]="i * 50">
+        <div class="src-top">
+          <span class="src-icon"><app-icon [name]="s.icon" [size]="20"></app-icon></span>
+          <span class="src-count">{{ s.apis }} API{{ s.apis === 1 ? '' : 's' }}</span>
+        </div>
+        <h3>{{ s.name }}</h3>
+        <span class="src-auth">{{ s.authority }}</span>
+        <p>{{ s.text }}</p>
+        <a *ngIf="s.docs; else soon" class="src-link" [routerLink]="['/docs', s.docs]">Read the reference <app-icon name="arrow-right" [size]="14"></app-icon></a>
+        <ng-template #soon><a class="src-link muted" routerLink="/signup">Sign up to see the reference <app-icon name="arrow-right" [size]="14"></app-icon></a></ng-template>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- How it works -->
+<section class="section alt">
+  <div class="pub-wrap">
+    <div class="sec-head">
+      <span class="eyebrow">How it works</span>
+      <h2>From sign-up to your first live call</h2>
+    </div>
+    <ol class="steps">
+      <li *ngFor="let s of steps; let i = index">
+        <span class="step-num">{{ i + 1 }}</span>
+        <span class="step-icon"><app-icon [name]="s.icon" [size]="20"></app-icon></span>
+        <h3>{{ s.title }}</h3>
+        <p>{{ s.text }}</p>
+      </li>
+    </ol>
+  </div>
+</section>
+
+<!-- Developers -->
+<section class="section">
+  <div class="pub-wrap dev-grid">
+    <div>
+      <span class="eyebrow">For developers</span>
+      <h2>Two requests. That's the whole integration.</h2>
+      <p class="sec-p">Exchange your API key for a short-lived token, then call any API you have access to. Errors come back in one
+        consistent shape, and every reference page has samples in cURL, JavaScript, Python and Java.</p>
+      <div class="feat-list">
+        <div class="feat" *ngFor="let f of features">
+          <span class="feat-icon"><app-icon [name]="f.icon" [size]="18"></app-icon></span>
+          <div><h4>{{ f.title }}</h4><p>{{ f.text }}</p></div>
+        </div>
+      </div>
+      <a class="btn" routerLink="/docs"><app-icon name="book" [size]="15"></app-icon> Read the documentation</a>
+    </div>
+    <div class="code-card">
+      <div class="code-tabs"><span class="on">cURL</span></div>
+      <pre><code><span class="c"># 1. Exchange your key for a 15-minute token</span>
+TOKEN=$(curl -s -X POST \
+  "https://&lt;gativra-host&gt;/api/rbac/v1/oauth/token" \
+  -H "X-API-Key: $GATIVRA_API_KEY" | jq -r .access_token)
+
+<span class="c"># 2. Call FOIS rake tracking</span>
+curl -s -X POST "https://&lt;gativra-host&gt;/&lt;fois-endpoint&gt;" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{{ '{' }}"fnrnumber":"24211017345"{{ '}' }}'</code></pre>
+    </div>
+  </div>
+</section>
+
+<!-- About Gativra & SIPL -->
+<section class="section alt">
+  <div class="pub-wrap">
+    <div class="sec-head">
+      <span class="eyebrow">Who we are</span>
+      <h2>Gativra, by Suraj Informatics</h2>
+      <p>The API platform is part of Gativra, the AI smart logistics automation brand of Suraj Informatics Pvt. Ltd.</p>
+    </div>
+    <div class="who-grid">
+      <article class="who">
+        <img class="who-logo light-only" src="brand/gativra-logo.svg" alt="Gativra" />
+        <img class="who-logo dark-only" src="brand/gativra-logo-dark.svg" alt="Gativra" />
+        <h3>What is Gativra?</h3>
+        <p>Gativra is AI software that runs the physical side of logistics. It turns the cameras, sensors and weighbridges already on a site
+          into one system that reads every truck, container and pallet, decides what should happen and acts on it in under a second.</p>
+        <p>The name joins two Sanskrit words: <b>Gati</b>, speed, and <b>Vara</b>, a breeze: logistics that moves fast and flows smoothly.</p>
+        <div class="fam-grid">
+          <div class="fam" *ngFor="let f of families">
+            <app-icon [name]="f.icon" [size]="16"></app-icon>
+            <div><b>{{ f.title }}</b><span>{{ f.items }}</span></div>
+          </div>
+        </div>
+      </article>
+      <article class="who sipl">
+        <span class="who-badge"><app-icon name="building" [size]="22"></app-icon></span>
+        <h3>What is SIPL?</h3>
+        <p><b>Suraj Informatics Pvt. Ltd. (SIPL)</b> is a Navi Mumbai technology company working in industrial automation and logistics.
+          Its engineering team builds, deploys and supports every Gativra product.</p>
+        <ul class="who-list">
+          <li><app-icon name="map-pin" [size]="15"></app-icon> {{ contact.address }}</li>
+          <li><app-icon name="truck" [size]="15"></app-icon> Ports, CFS and ICD terminals, warehouses and manufacturing plants</li>
+          <li><app-icon name="layers" [size]="15"></app-icon> Site survey, design, installation, ERP integration, training and support</li>
+        </ul>
+        <div class="who-actions">
+          <a class="btn" routerLink="/about">More about us</a>
+          <a class="btn btn-ghost" [href]="contact.site" target="_blank" rel="noopener">gativra.com <app-icon name="external" [size]="13"></app-icon></a>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="section">
+  <div class="pub-wrap">
+    <div class="cta-band">
+      <div>
+        <h2>Start building with free sandbox credits</h2>
+        <p>Create an account, try any API in the sandbox and request production access when you're ready.</p>
+      </div>
+      <div class="cta-actions">
+        <a class="btn btn-primary btn-lg" routerLink="/signup">Create free account</a>
+        <a class="btn btn-lg on-dark" [href]="'tel:' + contact.tollFree"><app-icon name="phone" [size]="15"></app-icon> {{ contact.tollFree }}</a>
+      </div>
+    </div>
+  </div>
+</section>

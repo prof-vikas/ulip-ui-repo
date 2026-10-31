@@ -1,0 +1,227 @@
+<div class="page" *ngIf="doc() as d; else missing">
+  <div class="doc-head">
+    <div>
+      <div class="eyebrow">API reference · {{ d.category }}</div>
+      <h1>{{ d.title }}</h1>
+      <p class="lead">{{ d.summary }}</p>
+      <div class="endpoint">
+        <span class="method" [attr.data-method]="d.method">{{ d.method }}</span>
+        <code class="mono">{{ d.path }}</code>
+        <button type="button" class="btn btn-ghost btn-sm" (click)="copy(endpointUrl(), 'endpoint')">
+          <app-icon name="copy" [size]="13"></app-icon> {{ copied() === 'endpoint' ? 'Copied' : 'Copy URL' }}
+        </button>
+      </div>
+    </div>
+    <div class="head-actions" *ngIf="!isPublic">
+      <a class="btn btn-primary" *ngIf="canOpen()" [routerLink]="'/dashboard' + d.portalPath">
+        <app-icon name="sparkle" [size]="15"></app-icon> Try it in the portal
+      </a>
+      <a class="btn" routerLink="/dashboard/catalog" *appHasPermission="'CATALOG_VIEW'">Request access</a>
+    </div>
+    <div class="head-actions" *ngIf="isPublic">
+      <ng-container *ngIf="signedIn; else guest">
+        <a class="btn btn-primary" [routerLink]="['/dashboard/docs', d.slug]">
+          <app-icon name="sparkle" [size]="15"></app-icon> Open in your dashboard
+        </a>
+      </ng-container>
+      <ng-template #guest>
+        <a class="btn btn-primary" routerLink="/signup"><app-icon name="sparkle" [size]="15"></app-icon> Get sandbox access</a>
+        <a class="btn" routerLink="/login">Sign in</a>
+      </ng-template>
+    </div>
+  </div>
+
+  <div class="layout">
+    <nav class="toc" aria-label="On this page">
+      <div class="toc-title">On this page</div>
+      <button type="button" *ngFor="let t of toc" (click)="scrollTo(t.id)">{{ t.label }}</button>
+    </nav>
+
+    <div class="content">
+      <section id="overview" class="panel panel-pad">
+        <h2>Overview</h2>
+        <p *ngFor="let p of d.overview">{{ p }}</p>
+        <dl class="kv facts">
+          <dt>Endpoint</dt><dd class="mono">{{ endpointUrl() }}</dd>
+          <dt>Method</dt><dd>{{ d.method }} · JSON in, JSON out</dd>
+          <dt>Authentication</dt><dd>Bearer token (15 minutes)</dd>
+          <dt>API id</dt><dd>{{ d.apiId }}</dd>
+        </dl>
+      </section>
+
+      <section id="auth" class="panel panel-pad">
+        <h2>Authentication</h2>
+        <ol class="steps">
+          <li *ngIf="isPublic && !signedIn">
+            <b>Create a free account.</b> <a routerLink="/signup">Sign up</a> with your work e-mail; every account starts with sandbox credits.
+          </li>
+          <li>
+            <b>Get access.</b> Request sandbox or production access for this API in the
+            <a [routerLink]="links.catalog">API catalog</a>. Production access is approved by an administrator, who sets your quota.
+          </li>
+          <li>
+            <b>Create an API key</b> under <a [routerLink]="links.keys">API keys</a> for that environment. It is shown once; keep it on your server.
+          </li>
+          <li>
+            <b>Exchange the key for a token.</b> <code class="mono">POST {{ tokenUrl }}</code> with header
+            <code class="mono">X-API-Key: &lt;key&gt;</code>. The answer is
+            <code class="mono">{{ '{' }} "access_token", "token_type": "Bearer", "expires_in": 900 {{ '}' }}</code>.
+            Reuse the token until it expires instead of exchanging on every call.
+          </li>
+          <li><b>Call the API</b> with <code class="mono">Authorization: Bearer &lt;access_token&gt;</code>.</li>
+        </ol>
+        <div class="alert alert-info">
+          <app-icon name="info" [size]="16"></app-icon>
+          <span>Sandbox keys (<code class="mono">gativra_test_…</code>) give sandbox tokens, which only the sandbox endpoint accepts. Production keys (<code class="mono">gativra_live_…</code>) give production tokens.</span>
+        </div>
+      </section>
+
+      <section id="request" class="panel">
+        <div class="panel-pad">
+          <h2>Request</h2>
+          <p>{{ d.request.description }}</p>
+        </div>
+        <div class="table-wrap">
+          <table class="table">
+            <thead><tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th><th>Example</th></tr></thead>
+            <tbody>
+              <tr *ngFor="let f of d.request.fields">
+                <td class="mono strong">{{ f.name }}</td>
+                <td class="muted">{{ f.type }}</td>
+                <td><app-status-badge [value]="f.required ? 'ACTIVE' : 'CANCELLED'" [label]="f.required ? 'Required' : 'Optional'"></app-status-badge></td>
+                <td>{{ f.description }}</td>
+                <td class="mono muted">{{ f.example }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="panel-pad">
+          <div class="code-head"><span>Request body</span>
+            <button type="button" class="btn btn-ghost btn-sm" (click)="copy(requestJson(), 'req')">{{ copied() === 'req' ? 'Copied' : 'Copy' }}</button>
+          </div>
+          <pre class="code"><code>{{ requestJson() }}</code></pre>
+        </div>
+      </section>
+
+      <section id="response" class="panel">
+        <div class="panel-pad">
+          <h2>Response</h2>
+          <p>Every answer uses the same envelope. {{ d.recordNote }}</p>
+        </div>
+        <div class="table-wrap">
+          <table class="table">
+            <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
+            <tbody>
+              <tr *ngFor="let f of d.envelope">
+                <td class="mono strong">{{ f.name }}</td>
+                <td class="muted">{{ f.type }}</td>
+                <td>{{ f.description }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="panel-pad two-col">
+          <div>
+            <div class="code-head"><span>Success (abridged, fictitious data)</span>
+              <button type="button" class="btn btn-ghost btn-sm" (click)="copy(responseJson(), 'res')">{{ copied() === 'res' ? 'Copied' : 'Copy' }}</button>
+            </div>
+            <pre class="code tall"><code>{{ responseJson() }}</code></pre>
+          </div>
+          <div>
+            <div class="code-head"><span>Error</span></div>
+            <pre class="code"><code>{{ errorJson() }}</code></pre>
+          </div>
+        </div>
+      </section>
+
+      <section id="fields" class="fields">
+        <h2 class="section-h">Field reference</h2>
+        <div class="panel group" *ngFor="let g of d.fieldGroups">
+          <div class="panel-head">
+            <div>
+              <h3 class="panel-title">{{ g.title }}</h3>
+              <p class="panel-sub mono">{{ g.path }}</p>
+            </div>
+          </div>
+          <p class="group-desc" *ngIf="g.description">{{ g.description }}</p>
+          <div class="table-wrap">
+            <table class="table">
+              <thead><tr><th>Field</th><th>Type</th><th>Description</th><th>Example</th></tr></thead>
+              <tbody>
+                <tr *ngFor="let f of g.fields">
+                  <td class="mono strong">{{ f.name }}</td>
+                  <td class="muted nowrap">{{ f.type }}</td>
+                  <td>{{ f.description }}</td>
+                  <td class="mono muted">{{ f.example || '' }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section id="codes" class="panel">
+        <div class="panel-pad"><h2>Status codes</h2><p>Returned in the <code class="mono">code</code> field of the body.</p></div>
+        <div class="table-wrap">
+          <table class="table">
+            <thead><tr><th>Code</th><th>Meaning</th><th>What to do</th><th>Quota used</th></tr></thead>
+            <tbody>
+              <tr *ngFor="let c of d.statusCodes">
+                <td><span class="code-chip" [class.ok]="c.code === '200'">{{ c.code }}</span></td>
+                <td>{{ c.meaning }}</td>
+                <td>{{ c.action }}</td>
+                <td class="muted">{{ c.quota }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="notes" class="notes">
+        <h2 class="section-h">Quota, caching &amp; data</h2>
+        <div class="grid grid-2">
+          <div class="panel panel-pad note" *ngFor="let n of d.notes" [class.warn]="n.tone === 'warning'">
+            <h3 class="panel-title">
+              <app-icon [name]="n.tone === 'warning' ? 'alert' : 'info'" [size]="16"></app-icon> {{ n.title }}
+            </h3>
+            <p *ngFor="let b of n.body">{{ b }}</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="samples" class="panel">
+        <div class="panel-head">
+          <h2 class="no-margin">Code samples</h2>
+          <div class="tabs">
+            <button type="button" class="tab" *ngFor="let l of langs" [class.active]="lang() === l.id" (click)="lang.set(l.id)">{{ l.label }}</button>
+          </div>
+        </div>
+        <div class="panel-pad">
+          <div class="code-head"><span>{{ lang() === 'curl' ? 'Shell' : (lang() | titlecase) }}</span>
+            <button type="button" class="btn btn-ghost btn-sm" (click)="copy(sample(), 'sample')">{{ copied() === 'sample' ? 'Copied' : 'Copy' }}</button>
+          </div>
+          <pre class="code"><code>{{ sample() }}</code></pre>
+        </div>
+      </section>
+    </div>
+  </div>
+</div>
+
+<ng-template #missing>
+  <div class="page">
+    <app-page-header title="API Documentation" eyebrow="Developer"
+      description="Integration reference for each Gativra API: authentication, request and response fields, status codes, quota rules and code samples.">
+    </app-page-header>
+    <div class="alert alert-warning" *ngIf="!listing()">
+      <app-icon name="alert" [size]="16"></app-icon><span>There is no reference page for that API yet. Pick one below.</span>
+    </div>
+    <div class="grid grid-3">
+      <a class="panel doc-card" *ngFor="let e of index" [routerLink]="[links.docs, e.slug]">
+        <span class="doc-cat">{{ e.category }}</span>
+        <span class="doc-title">{{ e.title }}</span>
+        <span class="doc-sum">{{ e.summary }}</span>
+        <span class="doc-go">Read reference <app-icon name="chevron-right" [size]="14"></app-icon></span>
+      </a>
+    </div>
+  </div>
+</ng-template>

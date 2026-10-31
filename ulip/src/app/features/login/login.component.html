@@ -1,30 +1,18 @@
 <div class="login-page">
-  <div class="theme-toggle-slot">
-    <app-theme-toggle></app-theme-toggle>
-  </div>
 
   <div class="login-left">
-    <div class="glow-orb glow-orb-a"></div>
-    <div class="glow-orb glow-orb-b"></div>
-
-    <div class="brand">
-      <div class="brand-logo">
-        <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
-          <rect width="40" height="40" rx="10" fill="white" fill-opacity="0.15"/>
-          <path d="M8 20L20 8L32 20L20 32L8 20Z" fill="white" opacity="0.95"/>
-          <circle cx="20" cy="20" r="5" fill="#4F46E5"/>
-        </svg>
-      </div>
-      <div class="brand-text">
-        <h1>SIPL Portal</h1>
-        <p>SIPL API Library</p>
-      </div>
-    </div>
 
     <div class="welcome-text">
+      <div class="eyebrow">Gativra API Platform</div>
       <h2>Welcome back</h2>
       <div class="divider"></div>
-      <p class="sub">Secure access to integrated logistics data across Vahan, Sarathi, FASTag, FOIS and E-Way Bill systems.</p>
+      <p class="sub">Secure access to integrated logistics data across Vahan, Sarathi, FASTag, FOIS, E-Way Bill and ICE GATE.</p>
+      <ul class="trust">
+        <li><span class="dot"></span>Role-based access for every team</li>
+        <li><span class="dot"></span>Sandbox credits to try before you go live</li>
+        <li><span class="dot"></span>Usage, credits and approvals in one place</li>
+        <li><span class="dot"></span>A Suraj Informatics brand</li>
+      </ul>
     </div>
   </div>
 
@@ -35,14 +23,16 @@
         <p>Enter your credentials to access the portal</p>
       </div>
 
+      <div class="alert-info" *ngIf="infoMessage" role="status">{{ infoMessage }}</div>
+
       <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" novalidate>
         <div class="form-group">
-          <label for="userName">Username <span class="required">*</span></label>
+          <label for="userName">Username or e-mail <span class="required">*</span></label>
           <input
             id="userName"
             type="text"
             formControlName="userName"
-            placeholder="Enter username"
+            placeholder="Enter username or e-mail"
             autocomplete="username"
             maxlength="100"
             [class.field-invalid]="loginForm.get('userName')?.invalid && loginForm.get('userName')?.touched"
@@ -55,7 +45,10 @@
         </div>
 
         <div class="form-group">
-          <label for="password">Password <span class="required">*</span></label>
+          <div class="label-row">
+            <label for="password">Password <span class="required">*</span></label>
+            <a routerLink="/forgot-password" class="link-sm">Forgot password?</a>
+          </div>
           <div class="input-wrapper">
             <input
               id="password"
@@ -67,8 +60,7 @@
               [class.field-invalid]="loginForm.get('password')?.invalid && loginForm.get('password')?.touched"
             />
             <button type="button" class="toggle-pass" (click)="togglePassword()" [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'">
-              <span *ngIf="!showPassword">👁</span>
-              <span *ngIf="showPassword">🙈</span>
+              <app-icon [name]="showPassword ? 'eye-off' : 'eye'" [size]="17"></app-icon>
             </button>
           </div>
           <span class="error-text"
@@ -79,7 +71,7 @@
         </div>
 
         <div class="alert-error" *ngIf="errorMessage" role="alert" aria-live="assertive">
-          <span>⚠ {{ errorMessage }}</span>
+          <app-icon name="alert" [size]="15"></app-icon><span>{{ errorMessage }}</span>
         </div>
 
         <button type="submit" class="btn-login" [disabled]="loading">
@@ -88,8 +80,10 @@
         </button>
       </form>
 
+      <p class="switch-auth">New to the API library? <a routerLink="/signup">Create a developer account</a></p>
+
       <div class="card-footer">
-        <p>SIPL Portal v1.0 &nbsp;·&nbsp; Secure Login</p>
+        <p>Gativra &nbsp;·&nbsp; Secure sign-in</p>
       </div>
     </div>
   </div>

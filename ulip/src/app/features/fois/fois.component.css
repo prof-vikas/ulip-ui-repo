@@ -1,0 +1,130 @@
+.form-grid.four {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.journey {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.station {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 80px;
+}
+
+.station.right {
+  text-align: right;
+}
+
+.st-label {
+  font-size: 11.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--color-text-faint);
+}
+
+.st-code {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--color-text);
+}
+
+.track {
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.track-line {
+  position: absolute;
+  top: 12px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: repeating-linear-gradient(90deg, var(--color-primary) 0 8px, transparent 8px 14px);
+}
+
+.train {
+  position: relative;
+  font-size: 22px;
+  background: var(--color-surface);
+  padding: 0 8px;
+  line-height: 1.1;
+}
+
+.track-status {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--color-primary);
+  background: var(--color-primary-light);
+  padding: 3px 10px;
+  border-radius: var(--radius-pill);
+}
+
+.alert-new {
+  padding: 12px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-warning-border);
+  background: var(--color-warning-bg);
+  color: var(--color-warning);
+  font-size: 13.5px;
+  margin-bottom: 16px;
+}
+
+.sum-item.highlight {
+  background: var(--gradient-brand);
+  border-color: transparent;
+}
+
+.sum-item.highlight .sum-label,
+.sum-item.highlight .sum-value {
+  color: #fff;
+}
+
+.sum-value.big {
+  font-size: 19px;
+}
+
+.legs {
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.leg-list {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.charges .num,
+.result-table .num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.charges tr.total td {
+  font-weight: 800;
+  color: var(--color-text);
+  border-top: 2px solid var(--color-border);
+}
+
+.words {
+  margin: 12px 0 0;
+  font-size: 12.5px;
+  color: var(--color-text-muted);
+}
+
+@media (max-width: 860px) {
+  .form-grid.four {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

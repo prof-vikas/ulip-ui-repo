@@ -1,0 +1,78 @@
+<div class="page">
+  <div class="alert alert-warning" *ngIf="denied" role="alert">
+    <app-icon name="lock" [size]="16"></app-icon>
+    <span>That page isn't available for your role. Ask an administrator if you need access.</span>
+  </div>
+
+  <section class="hero">
+    <div class="hero-orb"></div>
+    <div class="hero-text">
+      <div class="hero-eyebrow">{{ greeting }}</div>
+      <h1>{{ firstName || 'Welcome' }}</h1>
+      <p>
+        Signed in as <b>{{ (user()?.role || '') | titlecase }}</b>
+        <ng-container *ngIf="user()?.organisation"> · {{ user()?.organisation }}</ng-container>
+      </p>
+    </div>
+    <div class="hero-meta" *ngIf="user()?.lastLoginAt">
+      <app-icon name="clock" [size]="14"></app-icon>
+      Last sign-in {{ user()?.lastLoginAt | date: 'd MMM, h:mm a' }}
+    </div>
+  </section>
+
+  <section class="grid grid-4 stats" *ngIf="summary || pendingApprovals !== null">
+    <a class="panel stat" *ngIf="pendingApprovals !== null" routerLink="/dashboard/admin/approvals">
+      <span class="stat-icon warn"><app-icon name="inbox"></app-icon></span>
+      <div><div class="stat-value">{{ pendingApprovals }}</div><div class="stat-label">Requests awaiting approval</div></div>
+    </a>
+    <ng-container *ngIf="summary">
+      <a class="panel stat" *appHasPermission="'ACCESS_REQUEST_CREATE'" routerLink="/dashboard/access">
+        <span class="stat-icon ok"><app-icon name="check-circle"></app-icon></span>
+        <div><div class="stat-value">{{ approvedApis }}</div><div class="stat-label">APIs with access</div></div>
+      </a>
+      <a class="panel stat" *appHasPermission="'ACCESS_REQUEST_CREATE'" routerLink="/dashboard/access">
+        <span class="stat-icon"><app-icon name="clock"></app-icon></span>
+        <div><div class="stat-value">{{ pendingRequests }}</div><div class="stat-label">Requests pending</div></div>
+      </a>
+      <a class="panel stat" *appHasPermission="'API_KEY_MANAGE'" routerLink="/dashboard/keys">
+        <span class="stat-icon"><app-icon name="key"></app-icon></span>
+        <div>
+          <div class="stat-value">{{ summary.activeSandboxKeys + summary.activeProductionKeys }}</div>
+          <div class="stat-label">Active API keys</div>
+        </div>
+      </a>
+      <a class="panel stat" *appHasPermission="'USAGE_VIEW_OWN'" routerLink="/dashboard/usage">
+        <span class="stat-icon"><app-icon name="coins"></app-icon></span>
+        <div><div class="stat-value">{{ sandboxCredits | number }}</div><div class="stat-label">Sandbox credits left</div></div>
+      </a>
+    </ng-container>
+  </section>
+
+  <section *ngIf="modules().length">
+    <h2 class="section-title">Data APIs</h2>
+    <div class="grid grid-3">
+      <a class="panel tile" *ngFor="let m of modules()" [routerLink]="m.route">
+        <span class="tile-icon"><app-icon [name]="m.icon" [size]="20"></app-icon></span>
+        <div class="tile-text">
+          <div class="tile-title">{{ m.label }}</div>
+          <div class="tile-hint">{{ m.hint }}</div>
+        </div>
+        <app-icon class="tile-go" name="chevron-right" [size]="16"></app-icon>
+      </a>
+    </div>
+  </section>
+
+  <section *ngIf="tools().length">
+    <h2 class="section-title">Shortcuts</h2>
+    <div class="grid grid-3">
+      <a class="panel tile" *ngFor="let t of tools()" [routerLink]="t.route">
+        <span class="tile-icon alt"><app-icon [name]="t.icon" [size]="20"></app-icon></span>
+        <div class="tile-text">
+          <div class="tile-title">{{ t.label }}</div>
+          <div class="tile-hint">{{ t.hint }}</div>
+        </div>
+        <app-icon class="tile-go" name="chevron-right" [size]="16"></app-icon>
+      </a>
+    </div>
+  </section>
+</div>

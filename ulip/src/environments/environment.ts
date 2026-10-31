@@ -7,6 +7,10 @@ export const environment = {
   menuModules: 'all',
   // apiBaseUrl: '/ulip/api',
     apiBaseUrl: 'https://ulip.surajinformatics.in/ulip/api',
+  // ulip-rbac (roles, menus, developer portal). Proxied to :8086 by proxy.conf.json under ng serve.
+  rbacApiUrl: '/api/rbac/v1',
+  // Base URL of the SANDBOX ulip-rest (same paths as apiBaseUrl). Empty = sandbox calls from the portal are off.
+  sandboxApiBaseUrl: '',
   endpoints: {
     login: '/ulip/auth/login',
     vahan01: '/vahan/01',
@@ -16,8 +20,10 @@ export const environment = {
     vahan05: '/ulip/vahan/getVahanDetails/05',
     vahan06: '/ulip/vahan/getVahanDetails/06',
     sarathi: '/ulip/getSarathiDetails',
-    fastag: '/fastag',
-    fois: '/fois',
+    fastag: '/ulip/getFastagDetails',
+    fastag02: '/ulip/getFastagTwoDetails',
+    fois: '/ulip/getFoisDetails',
+    fois02: '/ulip/getFoisDetails/02',
     ewaybill: '/ulip/getEWayBillDetails',
     icegate01: '/ulip/icegate/v1/01',
     icegate02: '/ulip/icegate/v1/02',

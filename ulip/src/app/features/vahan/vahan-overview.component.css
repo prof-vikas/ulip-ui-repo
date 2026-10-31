@@ -44,7 +44,7 @@
   flex-direction: column;
   gap: 14px;
   transition: box-shadow var(--transition-base), border-color var(--transition-base), transform var(--transition-base);
-  animation: fadeInUp 0.4s ease both;
+  animation: fadeInUp 0.24s ease both;
 }
 
 .card-available:hover {

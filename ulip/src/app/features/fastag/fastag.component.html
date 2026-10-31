@@ -1,0 +1,115 @@
+<div class="page-container wide">
+
+
+  <div class="page-header">
+    <div class="breadcrumb">FASTag &rsaquo; FASTag {{ api }}</div>
+    <h1 class="page-title">{{ api === '01' ? 'FASTag 01 · Toll Plaza Crossings' : 'FASTag 02 · Tag Details' }}</h1>
+    <p class="page-desc" *ngIf="api === '01'">Recent toll-plaza reads of a vehicle: plaza, time, lane direction and location.</p>
+    <p class="page-desc" *ngIf="api === '02'">The FASTag issued to a vehicle — tag id, status, class and issuing bank. Search by vehicle number, tag id, or both.</p>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Request Parameters</div>
+    <form (ngSubmit)="submit()">
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="vehiclenumber">Vehicle Number <span class="required" *ngIf="api === '01'">*</span></label>
+          <input id="vehiclenumber" name="vehiclenumber" [(ngModel)]="vehiclenumber" placeholder="e.g. MH12AB1234"
+                 autocomplete="off" maxlength="20" [class.field-invalid]="submitted && !valid" />
+        </div>
+        <div class="form-group" *ngIf="api === '02'">
+          <label for="tagid">Tag ID</label>
+          <input id="tagid" name="tagid" [(ngModel)]="tagid" placeholder="e.g. 34161FA82032D4A40200C3E0"
+                 autocomplete="off" maxlength="40" [class.field-invalid]="submitted && !valid" />
+        </div>
+      </div>
+      <span class="error-text" *ngIf="submitted && !valid">
+        {{ api === '01' ? 'Vehicle number is required' : 'Enter a vehicle number or a tag id' }}
+      </span>
+      <div class="form-actions">
+        <button type="submit" class="btn-primary" [disabled]="loading">
+          <span *ngIf="!loading">Search</span>
+          <span *ngIf="loading" class="spinner"></span>
+        </button>
+        <button type="button" class="btn-secondary" (click)="clear()">Clear</button>
+      </div>
+    </form>
+  </div>
+
+  <ng-container *ngIf="result as r">
+    <div class="status-banner" [class.status-success]="r.ok && !providerFailed" [class.status-error]="!r.ok || providerFailed">
+      <div class="status-left">
+        <span class="status-dot"></span>
+        <div>
+          <div class="status-title">
+            {{ !r.ok ? 'Query failed' : providerFailed ? (api === '01' ? 'No toll reads found' : 'No tag found') : (api === '01' ? reads.length + ' toll reads found' : tags.length + (tags.length === 1 ? ' tag found' : ' tags found')) }}
+          </div>
+          <div class="status-sub">{{ r.message || (r.ok ? 'Success' : 'Failed') }} <ng-container *ngIf="r.code"> &nbsp;·&nbsp; Code {{ r.code }}</ng-container></div>
+          <div class="status-hint" *ngIf="!r.ok && hint(r.code)">{{ hint(r.code) }}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FASTag 01: summary + timeline -->
+    <ng-container *ngIf="api === '01' && reads.length">
+      <div class="summary">
+        <div class="sum-item"><span class="sum-label">Vehicle</span><span class="sum-value mono">{{ show(latest?.vehicleRegNo) }}</span></div>
+        <div class="sum-item"><span class="sum-label">Last seen at</span><span class="sum-value">{{ show(latest?.tollPlazaName) }}</span></div>
+        <div class="sum-item"><span class="sum-label">Last read</span><span class="sum-value">{{ show(latest?.readerReadTime) }}</span></div>
+        <div class="sum-item"><span class="sum-label">Plazas crossed</span><span class="sum-value">{{ plazaCount }}</span></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Toll Crossings · newest first</div>
+        <ol class="timeline">
+          <li *ngFor="let t of reads; let first = first" [class.latest]="first">
+            <span class="tl-dot"></span>
+            <div class="tl-body">
+              <div class="tl-head">
+                <span class="tl-plaza">{{ show(t.tollPlazaName) }}</span>
+                <span class="tl-time">{{ show(t.readerReadTime) }}</span>
+              </div>
+              <div class="tl-meta">
+                <span class="chip" *ngIf="t.laneDirection">Lane {{ t.laneDirection }}</span>
+                <span class="chip" *ngIf="t.vehicleType">Class {{ t.vehicleType }}</span>
+                <a class="chip link" *ngIf="map(t.tollPlazaGeocode) as url" [href]="url" target="_blank" rel="noopener">
+                  {{ t.tollPlazaGeocode }} ↗
+                </a>
+              </div>
+            </div>
+          </li>
+        </ol>
+      </div>
+    </ng-container>
+
+    <!-- FASTag 02: one card per tag -->
+    <ng-container *ngIf="api === '02'">
+      <div class="card tag-card" *ngFor="let t of tags">
+        <div class="tag-top">
+          <div>
+            <div class="card-title no-gap">FASTag</div>
+            <div class="tag-id mono">{{ show(t.attrs['TAGID']) }}</div>
+          </div>
+          <app-status-badge [value]="tagStatus(t).tone" [label]="tagStatus(t).label"></app-status-badge>
+        </div>
+        <div class="detail-grid">
+          <div class="detail-item"><span class="detail-label">Vehicle</span><span class="detail-value mono">{{ show(t.attrs['REGNUMBER']) }}</span></div>
+          <div class="detail-item"><span class="detail-label">Vehicle Class</span><span class="detail-value">{{ show(t.attrs['VEHICLECLASS']) }}</span></div>
+          <div class="detail-item"><span class="detail-label">Issuing Bank</span><span class="detail-value">{{ show(t.attrs['BANKID']) }}</span></div>
+          <div class="detail-item"><span class="detail-label">Issue Date</span><span class="detail-value">{{ show(t.attrs['ISSUEDATE']) }}</span></div>
+          <div class="detail-item"><span class="detail-label">Exception Code</span><span class="detail-value">{{ show(t.attrs['EXCCODE']) }}</span></div>
+          <div class="detail-item"><span class="detail-label">Commercial Vehicle</span><span class="detail-value">{{ show(t.attrs['COMVEHICLE']) }}</span></div>
+        </div>
+        <details class="all-attrs">
+          <summary>All attributes ({{ t.all.length }})</summary>
+          <table class="result-table">
+            <tbody>
+              <tr *ngFor="let a of t.all"><td class="mono">{{ a.name }}</td><td>{{ show(a.value) }}</td></tr>
+            </tbody>
+          </table>
+        </details>
+      </div>
+    </ng-container>
+  </ng-container>
+
+</div>

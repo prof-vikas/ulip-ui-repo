@@ -1,0 +1,172 @@
+<div class="page-container wide">
+
+
+  <div class="page-header">
+    <div class="breadcrumb">FOIS &rsaquo; FOIS {{ api }}</div>
+    <h1 class="page-title">{{ api === '01' ? 'FOIS 01 · Rake Tracking' : 'FOIS 02 · Freight Calculation' }}</h1>
+    <p class="page-desc" *ngIf="api === '01'">Current status, last reported station and ETA of a rail consignment by its Forwarding Note Number (FNR).</p>
+    <p class="page-desc" *ngIf="api === '02'">Indian Railways freight for a commodity between two stations in a given wagon type — distance, route, charges, GST and total.</p>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Request Parameters</div>
+    <form (ngSubmit)="submit()">
+      <div class="form-grid" *ngIf="api === '01'">
+        <div class="form-group">
+          <label for="fnr">FNR Number <span class="required">*</span></label>
+          <input id="fnr" name="fnr" [(ngModel)]="fnrnumber" placeholder="e.g. 24211017345" autocomplete="off" maxlength="20"
+                 inputmode="numeric" [class.field-invalid]="submitted && !fnrnumber.trim()" />
+          <span class="error-text" *ngIf="submitted && !fnrnumber.trim()">FNR number is required</span>
+        </div>
+      </div>
+
+      <div class="form-grid four" *ngIf="api === '02'">
+        <div class="form-group">
+          <label for="from">From Station <span class="required">*</span></label>
+          <input id="from" name="from" [(ngModel)]="freightForm.sttnfrom" placeholder="e.g. JSG" maxlength="10" autocomplete="off" [class.field-invalid]="missing('sttnfrom')" />
+        </div>
+        <div class="form-group">
+          <label for="to">To Station <span class="required">*</span></label>
+          <input id="to" name="to" [(ngModel)]="freightForm.sttnto" placeholder="e.g. BPQ" maxlength="10" autocomplete="off" [class.field-invalid]="missing('sttnto')" />
+        </div>
+        <div class="form-group">
+          <label for="cmdt">Commodity <span class="required">*</span></label>
+          <input id="cmdt" name="cmdt" [(ngModel)]="freightForm.cmdt" placeholder="e.g. COAL" maxlength="20" autocomplete="off" [class.field-invalid]="missing('cmdt')" />
+        </div>
+        <div class="form-group">
+          <label for="wagon">Wagon Type <span class="required">*</span></label>
+          <input id="wagon" name="wagon" [(ngModel)]="freightForm.wgontype" placeholder="e.g. BOXN" maxlength="10" autocomplete="off" [class.field-invalid]="missing('wgontype')" />
+        </div>
+      </div>
+      <span class="error-text" *ngIf="api === '02' && submitted && !valid">All four fields are required (FOIS station, commodity and wagon codes)</span>
+
+      <div class="form-actions">
+        <button type="submit" class="btn-primary" [disabled]="loading">
+          <span *ngIf="!loading">{{ api === '01' ? 'Track' : 'Calculate' }}</span>
+          <span *ngIf="loading" class="spinner"></span>
+        </button>
+        <button type="button" class="btn-secondary" (click)="clear()">Clear</button>
+      </div>
+    </form>
+  </div>
+
+  <ng-container *ngIf="result as r">
+    <div class="status-banner" [class.status-success]="r.ok && !noRecord" [class.status-error]="!r.ok || noRecord">
+      <div class="status-left">
+        <span class="status-dot"></span>
+        <div>
+          <div class="status-title">
+            {{ !r.ok ? 'Query failed' : noRecord ? (api === '01' ? 'No tracking record for this FNR' : 'Freight could not be calculated') : (api === '01' ? 'Rake found' : 'Freight calculated') }}
+          </div>
+          <div class="status-sub">{{ freightError || r.message || (r.ok ? 'Success' : 'Failed') }} <ng-container *ngIf="r.code"> &nbsp;·&nbsp; Code {{ r.code }}</ng-container></div>
+          <div class="status-hint" *ngIf="!r.ok && hint(r.code)">{{ hint(r.code) }}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FOIS 01 -->
+    <ng-container *ngIf="api === '01' && rake as k">
+      <div class="journey card">
+        <div class="station">
+          <span class="st-label">From</span>
+          <span class="st-code">{{ show(k.stationFrom) }}</span>
+        </div>
+        <div class="track">
+          <span class="track-line"></span>
+          <span class="train"><app-icon name="train" [size]="20"></app-icon></span>
+          <span class="track-status">{{ show(k.currentStatus) }}</span>
+        </div>
+        <div class="station right">
+          <span class="st-label">To</span>
+          <span class="st-code">{{ show(k.stationTo) }}</span>
+        </div>
+      </div>
+
+      <div class="alert-new" *ngIf="k.newFnr && k.newFnr !== k.fnrNo">
+        This consignment was re-booked under FNR <b class="mono">{{ k.newFnr }}</b>. Track that number from now on.
+      </div>
+
+      <div class="summary">
+        <div class="sum-item"><span class="sum-label">ETA at destination</span><span class="sum-value">{{ show(k.etaDstn) }}</span></div>
+        <div class="sum-item"><span class="sum-label">Last reported at</span><span class="sum-value">{{ show(k.lastRepLocn) }}</span></div>
+        <div class="sum-item"><span class="sum-label">Commodity</span><span class="sum-value">{{ show(k.cmdt) }}</span></div>
+        <div class="sum-item"><span class="sum-label">Locomotive</span><span class="sum-value mono">{{ show(k.locoNumb) }}</span></div>
+      </div>
+
+      <div class="card detail-card">
+        <div class="card-title">Tracking Details</div>
+        <div class="detail-grid">
+          <div class="detail-item"><span class="detail-label">FNR</span><span class="detail-value mono">{{ show(k.fnrNo) }}</span></div>
+          <div class="detail-item"><span class="detail-label">Last Reported Status</span><span class="detail-value">{{ show(k.lastRepStts) }}</span></div>
+          <div class="detail-item"><span class="detail-label">Current Status</span><span class="detail-value">{{ show(k.currentStatus) }}</span></div>
+          <div class="detail-item">
+            <span class="detail-label">Position</span>
+            <span class="detail-value">
+              <a *ngIf="rakeMap; else noPos" [href]="rakeMap" target="_blank" rel="noopener" class="chip link">{{ k.lttd }}, {{ k.lgtd }} ↗</a>
+              <ng-template #noPos>—</ng-template>
+            </span>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+
+    <!-- FOIS 02 -->
+    <ng-container *ngIf="api === '02' && freight">
+      <div class="summary">
+        <div class="sum-item highlight"><span class="sum-label">Total freight · train load</span><span class="sum-value big">{{ money(f('trantotlfrgt')) }}</span></div>
+        <div class="sum-item"><span class="sum-label">Per wagon</span><span class="sum-value">{{ money(f('wgontotlfrgt')) }}</span></div>
+        <div class="sum-item"><span class="sum-label">Distance</span><span class="sum-value">{{ show(f('dist')) }} km</span></div>
+        <div class="sum-item"><span class="sum-label">Transit time</span><span class="sum-value">{{ show(f('ETA')) }}</span></div>
+      </div>
+
+      <div class="card detail-card">
+        <div class="card-title">Route &amp; Rake</div>
+        <div class="detail-grid">
+          <div class="detail-item"><span class="detail-label">Route</span><span class="detail-value">{{ show(f('routInfo')) }}</span></div>
+          <div class="detail-item"><span class="detail-label">Via</span><span class="detail-value">{{ show(f('viaDesc')) }}</span></div>
+          <div class="detail-item"><span class="detail-label">Rake Size</span><span class="detail-value">{{ show(f('rakeSize')) }}</span></div>
+          <div class="detail-item"><span class="detail-label">Minimum / Mini Rake</span><span class="detail-value">{{ show(f('minmRake')) }} / {{ show(f('miniRake')) }}</span></div>
+          <div class="detail-item"><span class="detail-label">Carrying Capacity (PCC)</span><span class="detail-value">{{ show(f('PCC')) }}</span></div>
+          <div class="detail-item"><span class="detail-label">Load Class (TL / WL)</span><span class="detail-value">{{ show(f('tranloadclss')) }} / {{ show(f('wgonloadclss')) }}</span></div>
+        </div>
+        <div class="legs" *ngIf="routes.length">
+          <span class="detail-label">Alternative route legs</span>
+          <div class="leg-list">
+            <span class="chip" *ngFor="let r of routes">{{ show(r.sttnfrom) }} → {{ show(r.sttnto) }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card detail-card">
+        <div class="card-title">Freight Break-up</div>
+        <div class="table-scroll">
+          <table class="result-table charges">
+            <thead><tr><th></th><th class="num">Train load</th><th class="num">Per wagon</th></tr></thead>
+            <tbody>
+              <tr *ngFor="let row of chargeRows" [class.total]="row[1] === 'trantotlfrgt'">
+                <td>{{ row[0] }}</td>
+                <td class="num">{{ row[0].startsWith('Rate') || row[0].startsWith('Commodity') || row[0].startsWith('Chargeable') ? show(f(row[1])) : money(f(row[1])) }}</td>
+                <td class="num">{{ row[0].startsWith('Rate') || row[0].startsWith('Commodity') || row[0].startsWith('Chargeable') ? show(f(row[2])) : money(f(row[2])) }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="words" *ngIf="f('tranfrgttaxwrds') as w">GST in words: {{ show(w) }}</p>
+      </div>
+
+      <div class="card detail-card" *ngFor="let b of breakdowns">
+        <div class="card-title">{{ b.title }}</div>
+        <table class="result-table">
+          <thead><tr><th>Description</th><th>Code</th><th class="num">%</th><th class="num">Amount</th></tr></thead>
+          <tbody>
+            <tr *ngFor="let c of b.items">
+              <td>{{ show(c.desc) }}</td><td class="mono">{{ show(c.rebtcode) }}</td>
+              <td class="num">{{ show(c.prcn) }}</td><td class="num">{{ money(c.rebtamnt) }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </ng-container>
+  </ng-container>
+
+</div>

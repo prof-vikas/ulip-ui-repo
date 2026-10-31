@@ -39,7 +39,7 @@
   border: 1px solid var(--color-border);
   padding: 22px 26px;
   margin-bottom: 16px;
-  animation: fadeInUp 0.35s ease both;
+  animation: fadeInUp 0.24s ease both;
 }
 
 .card-title {
