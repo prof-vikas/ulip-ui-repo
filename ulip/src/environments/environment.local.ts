@@ -3,11 +3,6 @@
 // (see proxy.local.conf.json), so the browser never makes a cross-origin call.
 export const environment = {
   production: false,
-  // Build-time menu. Pick the modules the sidebar should expose, then build.
-  //   'all'                                   -> Vahan, Sarathi, FASTag, FOIS, E-Way Bill, ICE GATE
-  //   ['icegate']                             -> ICE GATE only
-  //   ['icegate', 'ewaybill']                 -> ICE GATE + E-Way Bill
-  menuModules: 'all',
   apiBaseUrl: '',
   // ulip-rbac (roles, menus, developer portal). Proxied to :8086 by proxy.local.conf.json.
   rbacApiUrl: '/api/rbac/v1',

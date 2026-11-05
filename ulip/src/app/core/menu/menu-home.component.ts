@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../auth/auth.service';
 import { MenuNode } from '../api/rbac.models';
-import { menuPathToRoute, moduleForMenuCode, isModuleEnabled } from './menu-config';
+import { menuPathToRoute } from './menu-config';
 
 /**
  * Landing target for /dashboard: the first page in the user's role-based menu (the home page when the
@@ -41,10 +41,6 @@ export class MenuHomeComponent implements OnInit {
 
   private firstRoute(nodes: MenuNode[]): string | null {
     for (const n of nodes) {
-      const module = moduleForMenuCode(n.code);
-      if (module && !isModuleEnabled(module)) {
-        continue;
-      }
       // Groups without a page (e.g. Administration) open their first child.
       const own = menuPathToRoute(n.path);
       const route = own ?? this.firstRoute(n.children ?? []);

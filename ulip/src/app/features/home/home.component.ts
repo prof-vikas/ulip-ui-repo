@@ -3,7 +3,7 @@ import { ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../core/auth/auth.service';
 import { RbacApiService } from '../../core/api/rbac-api.service';
 import { AccountSummary, MenuNode } from '../../core/api/rbac.models';
-import { isModuleEnabled, menuPathToRoute, moduleForMenuCode } from '../../core/menu/menu-config';
+import { menuPathToRoute, moduleForMenuCode } from '../../core/menu/menu-config';
 
 interface Shortcut {
   label: string;
@@ -86,10 +86,7 @@ export class HomeComponent implements OnInit {
 
   private moduleShortcuts(nodes: MenuNode[]): Shortcut[] {
     return nodes
-      .filter(n => {
-        const m = moduleForMenuCode(n.code);
-        return !!m && isModuleEnabled(m);
-      })
+      .filter(n => !!moduleForMenuCode(n.code))
       .map(n => ({
         label: n.label,
         icon: n.icon,

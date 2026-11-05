@@ -112,7 +112,7 @@
       <div class="code-tabs"><span class="on">cURL</span></div>
       <pre><code><span class="c"># 1. Exchange your key for a 15-minute token</span>
 TOKEN=$(curl -s -X POST \
-  "https://&lt;gativra-host&gt;/api/rbac/v1/oauth/token" \
+  "https://&lt;gativra-host&gt;/ulip-rbac/api/rbac/v1/oauth/token" \
   -H "X-API-Key: $GATIVRA_API_KEY" | jq -r .access_token)
 
 <span class="c"># 2. Call FOIS rake tracking</span>

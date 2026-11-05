@@ -1,13 +1,8 @@
 export const environment = {
   production: true,
-  // Build-time menu. Pick the modules the sidebar should expose, then build.
-  //   'all'                                   -> Vahan, Sarathi, FASTag, FOIS, E-Way Bill, ICE GATE
-  //   ['icegate']                             -> ICE GATE only
-  //   ['icegate', 'ewaybill']                 -> ICE GATE + E-Way Bill
-  menuModules: ['icegate', 'ewaybill'] ,
     apiBaseUrl: 'https://ulip.surajinformatics.in/ulip',
   // ulip-rbac (roles, menus, developer portal), served behind the same domain as the API.
-  rbacApiUrl: 'https://ulip.surajinformatics.in/ulip/api/rbac/v1',
+  rbacApiUrl: 'https://ulip.surajinformatics.in/ulip-rbac/api/rbac/v1',
   // Base URL of the SANDBOX ulip-rest (same paths as apiBaseUrl). Empty = sandbox calls from the portal are off.
   sandboxApiBaseUrl: '',
   endpoints: {

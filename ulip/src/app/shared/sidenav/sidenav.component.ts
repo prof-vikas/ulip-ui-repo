@@ -5,7 +5,7 @@ import { AuthService } from '../../core/auth/auth.service';
 import { LayoutService } from '../../core/layout/layout.service';
 import { InboxService } from '../../core/inbox/inbox.service';
 import { MenuNode } from '../../core/api/rbac.models';
-import { isModuleEnabled, menuPathToRoute, moduleForMenuCode } from '../../core/menu/menu-config';
+import { menuPathToRoute, moduleForMenuCode } from '../../core/menu/menu-config';
 
 interface NavItem {
   code: string;
@@ -33,7 +33,6 @@ const SECTION_ORDER = ['Overview', 'Data APIs', 'Developer', 'Account'];
 
 /**
  * Sidebar built from the user's ulip-rbac menu (GET /me/navigation), so it follows the role.
- * Data modules are additionally limited by the build's menuModules.
  */
 @Component({
   selector: 'app-sidenav',
@@ -122,9 +121,6 @@ export class SidenavComponent {
     };
     for (const node of nodes) {
       const module = moduleForMenuCode(node.code);
-      if (module && !isModuleEnabled(module)) {
-        continue;
-      }
       const item = this.toItem(node);
       if (module) {
         add('Data APIs', item);

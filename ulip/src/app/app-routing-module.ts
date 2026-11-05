@@ -17,7 +17,7 @@ import { ModuleOverviewComponent } from './core/menu/module-overview.component';
 const DATA = 'Data APIs';
 
 // Every child of /dashboard is checked by PermissionGuard against `data.permission` (role) and
-// `data.module` (the build's menuModules). Paths match ulip-rbac menu paths ('/vahan/01' etc.).
+// `data.module` (which data module the page belongs to). Paths match ulip-rbac menu paths ('/vahan/01' etc.).
 const routes: Routes = [
   {
     path: 'dashboard',

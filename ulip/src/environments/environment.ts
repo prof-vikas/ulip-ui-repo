@@ -1,10 +1,5 @@
 export const environment = {
   production: false,
-  // Build-time menu. Pick the modules the sidebar should expose, then build.
-  //   'all'                                   -> Vahan, Sarathi, FASTag, FOIS, E-Way Bill, ICE GATE
-  //   ['icegate']                             -> ICE GATE only
-  //   ['icegate', 'ewaybill']                 -> ICE GATE + E-Way Bill
-  menuModules: 'all',
   // apiBaseUrl: '/ulip/api',
     apiBaseUrl: 'https://ulip.surajinformatics.in/ulip/api',
   // ulip-rbac (roles, menus, developer portal). Proxied to :8086 by proxy.conf.json under ng serve.

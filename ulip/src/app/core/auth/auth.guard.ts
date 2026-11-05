@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { ActivatedRouteSnapshot, CanActivate, CanActivateChild, Router, RouterStateSnapshot, UrlTree } from '@angular/router';
 import { Observable, catchError, map, of } from 'rxjs';
 import { AuthService } from './auth.service';
-import { MenuModule, isModuleEnabled } from '../menu/menu-config';
+import { MenuModule } from '../menu/menu-config';
 
 /** Logged-in shell: requires a valid token and refreshes the profile and menu once per login. */
 @Injectable({ providedIn: 'root' })
@@ -32,7 +32,7 @@ export class AuthGuard implements CanActivate {
 
 /**
  * Per-route access: `data: { permission: 'USER_MANAGE' }` and, for data modules,
- * `data: { module: 'vahan' }` (also limited by the build's menuModules).
+ * `data: { module: 'vahan' }`.
  * Denied routes go to the landing page instead of showing an empty screen.
  */
 @Injectable({ providedIn: 'root' })
@@ -45,8 +45,7 @@ export class PermissionGuard implements CanActivate, CanActivateChild {
     // Data API pages also open for developers whose access request for that API was approved: the
     // server then includes the page in their menu even without the module permission.
     const granted = this.authService.hasPermission(permission) || (!!module && this.authService.menuAllows(state.url));
-    const allowed = granted && (!module || isModuleEnabled(module));
-    return allowed ? true : this.router.createUrlTree(['/dashboard'], { queryParams: { denied: 1 } });
+    return granted ? true : this.router.createUrlTree(['/dashboard'], { queryParams: { denied: 1 } });
   }
 
   canActivateChild(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean | UrlTree {

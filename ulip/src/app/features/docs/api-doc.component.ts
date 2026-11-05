@@ -10,7 +10,8 @@ import { EWAYBILL_DOC } from './ewaybill.doc';
 
 /** Public base URLs shown in the docs (production deployment). */
 const PUBLIC_BASE = 'https://ulip.surajinformatics.in/ulip';
-const TOKEN_URL = `${PUBLIC_BASE}/api/rbac/v1/oauth/token`;
+// ulip-rbac runs as its own web app (ulip-rbac.war), next to ulip-rest at /ulip.
+const TOKEN_URL = 'https://ulip.surajinformatics.in/ulip-rbac/api/rbac/v1/oauth/token';
 
 const DOCS: Record<string, ApiDoc> = Object.fromEntries(
   [SARATHI_DOC, FASTAG_01_DOC, FASTAG_02_DOC, FOIS_01_DOC, FOIS_02_DOC, EWAYBILL_DOC].map(d => [d.slug, d])

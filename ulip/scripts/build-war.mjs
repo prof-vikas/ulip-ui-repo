@@ -266,10 +266,8 @@ function readProdEnvironment() {
   if (!fs.existsSync(file)) return {};
   const source = fs.readFileSync(file, 'utf8');
   const apiBaseUrl = /apiBaseUrl\s*:\s*['"]([^'"]*)['"]/.exec(source);
-  const menuModules = /menuModules\s*:\s*('all'|\[[^\]]*\])/.exec(source);
   return {
     apiBaseUrl: apiBaseUrl ? apiBaseUrl[1] : 'unknown',
-    menuModules: menuModules ? menuModules[1].replace(/\s+/g, ' ') : 'unknown',
   };
 }
 
@@ -315,7 +313,6 @@ fs.writeFileSync(
     `configuration=${configuration}`,
     `environment-file=src/environments/environment.prod.ts`,
     `api-base-url=${env.apiBaseUrl}`,
-    `menu-modules=${env.menuModules}`,
     `base-href=${baseHref}`,
     `built-at=${builtAt.toISOString()}`,
     '',
@@ -341,5 +338,4 @@ const sizeMb = (fs.statSync(warFile).size / (1024 * 1024)).toFixed(2);
 log(`created ${path.relative(projectRoot, warFile)} (${sizeMb} MB, ${files.length} entries)`);
 log(`context path : ${contextPath}`);
 log(`api base URL : ${env.apiBaseUrl}  (baked from environment.prod.ts)`);
-log(`menu modules : ${env.menuModules}`);
 log(`deploy with  : npm run deploy:tomcat`);

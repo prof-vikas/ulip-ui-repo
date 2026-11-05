@@ -54,33 +54,10 @@ ng e2e
 
 Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
 
-## Menu configuration (build time)
+## Menus
 
-Which modules the sidebar exposes is decided at build time by `menuModules` in the
-environment file used by that build (`src/environments/environment*.ts`):
-
-```ts
-menuModules: 'all',                        // Vahan, Sarathi, FASTag, FOIS, E-Way Bill, ICE GATE
-menuModules: ['icegate'],                  // ICE GATE only
-menuModules: ['icegate', 'ewaybill'],      // ICE GATE + E-Way Bill
-```
-
-Rules:
-
-- `'all'` (or leaving the key out) shows every module.
-- An array shows only the listed modules, **in the order written** — the first
-  entry is also the landing page after login (`/dashboard` redirects to it).
-- Entries are case-insensitive and tolerate separators: `'ice-gate'`, `'ICE GATE'`
-  and `'icegate'` are equivalent (same for `e-waybill` / `ewaybill`).
-- An unrecognised value falls back to `'all'` rather than rendering an empty menu.
-- When exactly one module is enabled, its sub-menu is expanded by default.
-
-Example: build the ICE GATE–only portal
-
-```bash
-# set menuModules: ['icegate'] in src/environments/environment.prod.ts
-ng build --configuration production
-```
+The sidebar is built from ulip-rbac: each user sees the modules their role grants, plus the API
+pages of their approved access requests. Change menus in **Admin → Menus / Roles**, not in the build.
 
 ## Build a WAR and deploy to Tomcat
 
@@ -107,7 +84,7 @@ npm run deploy:tomcat   # stop, deploy, start, smoke-test
 Angular environment values are compile-time, not runtime: the WAR always contains
 the values from the environment file selected by the configuration
 (`environment.prod.ts` for `production`). Rebuild and redeploy to change the API
-base URL or `menuModules`.
+base URL.
 
 ### Context path
 
